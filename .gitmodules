@@ -1,0 +1,6 @@
+[submodule "TranAD"]
+	path = TranAD
+	url = https://github.com/imperial-qore/TranAD.git
+[submodule "pdoc-theme-gv"]
+	path = pdoc-theme-gv
+	url = https://github.com/gunnarvoet/pdoc-theme-gv
