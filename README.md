@@ -17,7 +17,7 @@ Multivariate Time Series Data](https://arxiv.org/pdf/2201.07284.pdf)
 
 * [Final best results of full evaluations of our simple neural networks.](./notebooks/SOTA_Evaluation.ipynb)
 
-* [See other various implemented models and their training and testing.](./notebooks/models_train_test.ipynb)
+* [See other various implemented models and their training and testing. (Python Version <3.10.0)](./notebooks/models_train_test.ipynb)
 
 
 ### Important: Running Notebooks in Jupyter Labs:
