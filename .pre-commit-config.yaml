@@ -1,8 +1,0 @@
-repos:
--   repo: local
-    hooks:
-    -   id: nox
-        name: Run format, test and make docs
-        entry: poetry run nox --stop-on-first-error --error-on-missing-interpreters && git add -u
-        language: system
-        pass_filenames: false

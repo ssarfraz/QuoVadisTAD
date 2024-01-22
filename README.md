@@ -50,10 +50,9 @@ More information on how to document the code can be found [here](https://pdoc.de
 3. clone repository
 4. if not already installed, [install poetry](https://python-poetry.org/docs/#installation)
 5. to install the required dependencies run `poetry install --with dev`
-6. run `poetry run pre-commit install`
 7. Make your changes. To check your code and update the documentation, run `poetry run nox` and check for errors / failures.
 8. [Add](https://python-poetry.org/docs/cli/#add) new or [remove](https://python-poetry.org/docs/cli/#remove) old dependencies using [poetry](https://python-poetry.org/docs/). 
-9. Commit your changes.
-   > This will automatically format the code and run all tests (which will also happen automatically on commit, but the commit will be rejected if for example a test fails).
-   If your code was not properly formatted before the commit, the commit will fail because files changed during the formatting process. In this case, just try to commit again.
-10. create pull request and wait for review
+9. run `poetry run nox`
+   > This will automatically format the code and run all tests
+10. Commit your changes.
+11. create pull request and wait for review
