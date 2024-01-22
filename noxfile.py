@@ -3,8 +3,8 @@ import nox
 @nox.session(python=False)
 def format_and_test(session):
     session.run("poetry", "install", "--with", "dev")
-    #session.run("poetry", "run", "ruff", "format", "src", "tests")
-    #session.run("poetry", "run", "ruff", "check", "--fix", "src", "tests")
+    session.run("poetry", "run", "ruff", "format", "src", "tests", "notebooks")
+    session.run("poetry", "run", "ruff", "check", "--fix", "src", "tests", "notebooks")
     session.run("poetry", "run", "pytest", "tests/")
 
 @nox.session(python=False)

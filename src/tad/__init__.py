@@ -9,8 +9,10 @@ It contains the implementations used to generate the results in the paper.
 import os
 from pathlib import Path
 
-DEFAULT_RESOURCE_DIR = Path(str(os.path.dirname(os.path.abspath(__file__))) + '/../../resources')
+DEFAULT_RESOURCE_DIR = Path(
+	str(os.path.dirname(os.path.abspath(__file__))) + "/../../resources"
+)
 """the default resource directory"""
 
-DEFAULT_DATA_DIR = DEFAULT_RESOURCE_DIR / 'processed_datasets'
+DEFAULT_DATA_DIR = DEFAULT_RESOURCE_DIR / "processed_datasets"
 """the default data directory"""
