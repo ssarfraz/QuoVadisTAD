@@ -13,7 +13,7 @@ Multivariate Time Series Data](https://arxiv.org/pdf/2201.07284.pdf)
 
 * [Dataset loading and Evaluation](./notebooks/dataset_loading_and_evaluation.ipynb)
 
-* [Final best results of full evaluations of our simple methods.](./notebooks/Baelines_Evaluation_v2.ipynb)
+* [Final best results of full evaluations of our simple methods.](./notebooks/Baselines_Evaluation_v2.ipynb)
 
 * [Final best results of full evaluations of our simple neural networks.](./notebooks/SOTA_Evaluation.ipynb)
 
@@ -21,13 +21,17 @@ Multivariate Time Series Data](https://arxiv.org/pdf/2201.07284.pdf)
 
 
 ### Important: Running Notebooks in Jupyter Labs:
-1. `cd` to the project root (or start a terminal in that directory)
-2. run: `poetry install --with notebooks` (has to be done only once) to install the required package for running jupyter
-3. run: `poetry run jupyter lab` to open jupyter labs
 
+1. `cd` to the project root (or start a terminal in that directory)
+2. run `poetry install --with notebooks` (has to be done only once) to install the required package for running jupyter
+3. run `poetry run jupyter lab` to open jupyter labs
 
 > When not running the notebook kernel from the poetry env, make sure to install the package and dependencies in the kernel env manually or install package from Pypi (**not recommended** as it might not be the same version as yours).
 
+Alternative for non-poetry users (not recommended):
+1. `cd` to the project root (or start a terminal in that directory)
+2. run `pip install .[notebooks]` (has to be done only once) to install the required package for running jupyter
+3. run `python -m jupyter lab` to open jupyter labs
 
 ## Notes
 
@@ -48,7 +52,8 @@ More information on how to document the code can be found [here](https://pdoc.de
 5. to install the required dependencies run `poetry install --with dev`
 6. run `poetry run pre-commit install`
 7. Make your changes. To check your code and update the documentation, run `poetry run nox` and check for errors / failures.
-8. Commit your changes.
+8. [Add](https://python-poetry.org/docs/cli/#add) new or [remove](https://python-poetry.org/docs/cli/#remove) old dependencies using [poetry](https://python-poetry.org/docs/). 
+9. Commit your changes.
    > This will automatically format the code and run all tests (which will also happen automatically on commit, but the commit will be rejected if for example a test fails).
    If your code was not properly formatted before the commit, the commit will fail because files changed during the formatting process. In this case, just try to commit again.
-8. create pull request and wait for review
+10. create pull request and wait for review
