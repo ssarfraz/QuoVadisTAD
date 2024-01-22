@@ -24,7 +24,6 @@ tqdm = "^4.66.1"
 scikit-learn = "^1.3.2"
 scipy = "^1.11.3"
 tensorflow-io-gcs-filesystem = "^0.31.0" # has to be installed separately because tensorflow metadata is not consistent
-tensorflow-intel = "^2.14.0" # has to be installed separately because tensorflow metadata is not consistent
 tensorflow = "^2.11.0"
 tensorflow-addons = "^0.22.0"
 pyyaml = "^6.0.1"
@@ -39,7 +38,6 @@ torch = "2.1.1"
 [tool.poetry.group.dev] # Development dependencies for testing, formatting/ linting and building docs.
 optional = true
 
-
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.2"
 ruff = "^0.1.1"
@@ -47,9 +45,21 @@ nox = "^2023.4.22"
 pdoc = "^14.1.0"
 
 
+[tool.poetry.group.notebooks]
+optional = true
+
 [tool.poetry.group.notebooks.dependencies]
 jupyterlab = "^4.0.9"
 
+
+[tool.poetry.group.intel]
+optional = true
+
+[tool.poetry.group.intel.dependencies]
+tensorflow-intel = [
+    {platform = "win32", version = "2.15.0"},
+    {platform = "linux", version = "2.14.0"}
+]
 
 [[tool.poetry.source]]
 name = "pytorch"
