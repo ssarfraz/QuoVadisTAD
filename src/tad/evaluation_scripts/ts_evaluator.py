@@ -253,8 +253,8 @@ def ts_precision_and_recall(anomalies: torch.Tensor, predictions: torch.Tensor, 
                             recall_cardinality_fn: CardinalityFunction = CardinalityFunction.INVERSE_PROPORTIONAL,
                             precision_bias_fn: Optional[BiasFunction] = None,
                             precision_cardinality_fn: Optional[CardinalityFunction] = None,
-                            anomaly_ranges: Optional[List[Tuple[int, 2]]] = None,
-                            prediction_ranges: Optional[List[Tuple[int, 2]]] = None,
+                            anomaly_ranges: Optional[List[Tuple[int, int]]] = None,
+                            prediction_ranges: Optional[List[Tuple[int, int]]] = None,
                             weighted_precision: bool = False) -> Tuple[float, float]:
     """
     Computes precision and recall for time series as defined in [Tatbul2018]_.
