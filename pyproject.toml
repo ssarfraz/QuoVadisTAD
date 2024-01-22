@@ -43,6 +43,7 @@ pytest = "^7.4.2"
 ruff = "^0.1.1"
 nox = "^2023.4.22"
 pdoc = "^14.1.0"
+pre-commit = "^3.6.0"
 
 
 [tool.poetry.group.notebooks]
