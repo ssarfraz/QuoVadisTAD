@@ -6,6 +6,17 @@ See the following three papers for reference on the problem, associated datasets
 Multivariate Time Series Data](https://arxiv.org/pdf/2201.07284.pdf)
 3. [Towards a Rigorous Evaluation of Time-series Anomaly Detection](https://arxiv.org/pdf/2109.05257.pdf)
 
+## Extras
+
+The following extras are available for this package:
+| extra string | description |
+| --- | --- |
+| dev | dependencies for deployment (like build tools) |
+| notebooks | dependencies for running local jupyter server |
+| intel | dependencies for increasing computation speed (exclusive to Intel CPUs) |
+
+Extras can be installed using `poetry install --with <extra string>`, multiple extras can be installed at the same time.
+> for non-poetry-users, the same can be done with `pip install .[<extra string>]` 
 
 ## Notebooks
 
@@ -40,7 +51,7 @@ Alternative for non-poetry users (not recommended):
 * We should now try out some of our ideas ...  
 
 ## Documentation
-The generated documentation can be found in the `doc` folder.
+After running `poetry run nox`, the generated documentation can be found in the `doc` folder.
 
 More information on how to document the code can be found [here](https://pdoc.dev/docs/pdoc.html#how-can-i).
 
