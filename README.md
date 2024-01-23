@@ -58,7 +58,7 @@ More information on how to document the code can be found [here](https://pdoc.de
 ## Contributing
 1. create issue to resolve
 2. create branch following the naming convention `#[issue_number]_[branch_name]`
-3. clone repository
+3. clone repository using `git clone <repo-url> --recurse-submodules`
 4. if not already installed, [install poetry](https://python-poetry.org/docs/#installation)
 5. to install the required dependencies run `poetry install --with dev`
 7. Make your changes. To check your code and update the documentation, run `poetry run nox` and check for errors / failures.
