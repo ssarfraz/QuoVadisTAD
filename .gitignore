@@ -10,7 +10,7 @@ falcetl/
 notebooks/UCR_all_sets_eval.ipynb
 notebooks/dataset_loading_and_evaluation.ipynb
 notebooks/synthetic_timeseries.ipynb
-resources/
+resources/paper
 
 # Temporary and binary files
 *~
