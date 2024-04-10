@@ -6,6 +6,12 @@ falcetl/
 .coverage
 .ruff_cache/
 
+# Temporary ignore them for development.
+notebooks/UCR_all_sets_eval.ipynb
+notebooks/dataset_loading_and_evaluation.ipynb
+notebooks/synthetic_timeseries.ipynb
+resources/
+
 # Temporary and binary files
 *~
 *.py[cod]

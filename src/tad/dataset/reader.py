@@ -29,10 +29,10 @@ class GeneralDataset(Enum):
 	SMD = "smd"
 	MSL = "msl"
 	SMAP = "smap"
-	UCR_1 = "ucr_1"
-	UCR_2 = "ucr_2"
-	UCR_3 = "ucr_3"
-	UCR_4 = "ucr_4"
+	UCR_IB_16 = "ucr_2"
+	UCR_IB_17 = "ucr_1"
+	UCR_IB_18 = "ucr_3"
+	UCR_IB_19 = "ucr_4"
 	UCR_ALL = "ucr_all"
 
 
@@ -335,10 +335,10 @@ dataset_loader_map: Dict[
 	GeneralDataset.WADI: _load_wadi,
 	GeneralDataset.WADI_GDN: _load_wadi_gdn,
 	GeneralDataset.SWAT: _load_swat,
-	GeneralDataset.UCR_1: _load_ucr,
-	GeneralDataset.UCR_2: _load_ucr_2,
-	GeneralDataset.UCR_3: _load_ucr_3,
-	GeneralDataset.UCR_4: _load_ucr_4,
+	GeneralDataset.UCR_IB_17: _load_ucr,
+	GeneralDataset.UCR_IB_16: _load_ucr_2,
+	GeneralDataset.UCR_IB_18: _load_ucr_3,
+	GeneralDataset.UCR_IB_19: _load_ucr_4,
 	GeneralDataset.UCR_ALL: _load_ucr_all,
 	GeneralDataset.SMD: _load_smd,
 	GeneralDataset.MSL: _load_msl,
