@@ -24,6 +24,7 @@ def run_baselines(
 	pca_dim=30,
 	use_window_feats=False,
 ):
+	"""the function that was called by `evaluate_datasets` to prepare the data and run the baselines on the datasets"""
 	train, test, labels = data
 
 	if isinstance(train, list):
@@ -86,6 +87,7 @@ def evaluate_baselines(
 	pca_dim=30,
 	verbose=False,
 ):
+	"""the function that was called by `run_baselines` to fit baseline models and evaluate the results on the datasets"""
 	if len(labels.shape) > 1:
 		test_labels = labels.max(1)
 	else:
@@ -213,6 +215,7 @@ def evaluate_baselines(
 	return res, df_f
 
 
+
 def evaluate_datasets(
 	preprocessing="0-1",
 	eval_method="standard",
@@ -223,6 +226,18 @@ def evaluate_datasets(
 	skip_useless_datasets=False,
 	verbose=True,
 ):
+	"""
+	the wrapper of the evaluation of the baselines on the datasets
+	:param preprocessing: str, normalization method
+	:param eval_method: str, evaluation method
+	:param distance: str, distance metric
+	:param pca_dim: int, pca dimension
+	:param use_window_feats: bool, whether to use window features
+	:param datasets_ordered: list, the datasets to be evaluated
+	:param skip_useless_datasets: bool, whether to skip useless datasets
+	:param verbose: bool, whether to print the evaluation results
+	:return: results, df_comb
+	"""
 	df_comb = []
 	results = []
 	if verbose:
@@ -231,6 +246,7 @@ def evaluate_datasets(
 		else:
 			print(f"[INFO]: Evaluating {len(GeneralDataset)} datasets")
 
+    # --- TODO: Clarify if we would need the following codes for setting up the datasets. ---
 	if datasets_ordered is None:
 		datasets_ordered = [
 			GeneralDataset.MSL,
@@ -241,22 +257,29 @@ def evaluate_datasets(
 			GeneralDataset.SMAP,
 			GeneralDataset.SMD,
 		]  # TODO why not all of them (like UCR_2, UCR_3, etc.)
+    # ---  end
 
 	for dataset in datasets_ordered:
 		dataset_name = dataset.name
+
+		# --- TODO: Clarify if we would need the following codes for setting up the datasets. ---
 		if dataset in [GeneralDataset.SMD, GeneralDataset.MSL, GeneralDataset.SMAP]:
 			pca_dim = 10
 			if skip_useless_datasets:
 				print(f"Skipping evaluation of {dataset_name}")
 				continue
+		# ---  end
 
 		# for dataset, loader in datasets.items():
 		train, test, labels = dataset_loader_map[dataset]()
 
+		# --- TODO: Clarify if we would need the following codes for setting up the datasets. ---
 		if use_window_feats:
 			print("using subset of WADI train")
 			train = train[:60_000]
-
+		# ---  end
+		
+		# apply the simple baselines to the dataset and evaluate the performance.
 		result, df = run_baselines(
 			[train, test, labels],
 			preprocessing=preprocessing,
@@ -266,6 +289,7 @@ def evaluate_datasets(
 			use_window_feats=use_window_feats,
 		)
 
+		# Format the results into a pandas dataframe
 		multi_col = [(dataset_name, col) for col in df.columns]
 		df.columns = pd.MultiIndex.from_tuples(multi_col)
 		df_comb.append(df)
