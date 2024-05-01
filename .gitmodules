@@ -1,0 +1,3 @@
+[submodule "pdoc-theme-gv"]
+	path = pdoc-theme-gv
+	url = https://github.com/gunnarvoet/pdoc-theme-gv
