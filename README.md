@@ -1,8 +1,6 @@
 # Quo Vadis, Unsupervised Time Series Anomaly Detection?
 
-QuoVadisTAD contains the artifacts of our position paper published at the 2024 International Conference on Machine Learning (ICML): [Quo Vadis, Unsupervised Time Series Anomaly Detection?]().
-
-This comprehensive study addressed the critical shortcomings in latest Timeseries Anomaly Detection (TAD) research. It is a clarion call for a paradigm shift—away from the allure of mere novelty towards robust benchmarking, meaningful datasets, and a deeper understanding of model utility for specific tasks. Our findings challenge the status quo, revealing that complexity doesn't always equate to superiority, as many state-of-the-art models are outperformed by simpler, more interpretable methods. To faciliate this, the prepared datasets, proposed simple baselines, evaluation protocals, and metrics are released in this repository for clarity and simplicity in the pursuit of truly effective TAD solutions in the future. Details can be found in [our paper]().
+QuoVadisTAD contains the artifacts of our position paper published at the 2024 International Conference on Machine Learning (ICML): [Quo Vadis, Unsupervised Time Series Anomaly Detection?](). We advocate for a shift towards rigorous benchmarking, rich datasets, and a nuanced understanding of model utility. Our findings debunk the myth that complexity equals superiority, showcasing the prowess of simpler, more interpretable methods. This repository aims to faciliate the course of correction by offering meticulously prepared datasets, simple baselines, and rigorious evaluation protocols. Join us in shaping the future of TAD with tools that prioritize clarity and effectiveness, making it an invaluable asset for the academic research and open-source communities. 
 
 
 ## Installation
