@@ -31,7 +31,7 @@ resources/processed_datasets/UCR/
 __pycache__/*
 .cache/*
 .*.swp
-*/.ipynb_checkpoints/*
+.ipynb_checkpoints
 .DS_Store
 
 # Project files
