@@ -2,17 +2,6 @@
 We use the following multivariate and univariate datasets, see the paper for more details. For the purpose of consistant benchmarking and evaluation, we provide the prepared datasets downloadable from this [Download Link](https://bwsyncandshare.kit.edu/s/YixoyiHx2xf8yZ9).
 
 
-## SMAP/MSL dataset
-
-Data taken from:
-https://s3-us-west-2.amazonaws.com/telemanom/data.zip
-
-labeled anomalies from:
-https://raw.githubusercontent.com/khundman/telemanom/master/labeled_anomalies.csv
-
-Corresponding paper:
-Hundman, Kyle, Valentino Constantinou, Christopher Laporte, Ian Colwell, and Tom Soderstrom. "Detecting spacecraft anomalies using lstms and nonparametric dynamic thresholding." In Proceedings of the 24th ACM SIGKDD international conference on knowledge discovery & data mining, pp. 387-395. 2018.
-
 ## SMD Dataset
 
 This dataset is taken as is from https://github.com/NetManAIOps/OmniAnomaly
@@ -37,3 +26,14 @@ We include the four InternalBleeding datasets.
 
 Corresponding paper:
 Keogh, E., Dutta Roy, T., Naik, U. & Agrawal, A (2021). Multi-dataset Time-Series Anomaly Detection Competition, SIGKDD 2021.
+
+## SMAP/MSL dataset
+
+Data taken from:
+https://s3-us-west-2.amazonaws.com/telemanom/data.zip
+
+labeled anomalies from:
+https://raw.githubusercontent.com/khundman/telemanom/master/labeled_anomalies.csv
+
+Corresponding paper:
+Hundman, Kyle, Valentino Constantinou, Christopher Laporte, Ian Colwell, and Tom Soderstrom. "Detecting spacecraft anomalies using lstms and nonparametric dynamic thresholding." In Proceedings of the 24th ACM SIGKDD international conference on knowledge discovery & data mining, pp. 387-395. 2018.
