@@ -10,6 +10,7 @@ falcetl/
 notebooks/synthetic_timeseries.ipynb
 
 # Datasets
+resources/processed_datasets/SMAP/
 resources/processed_datasets/MSL/
 resources/processed_datasets/SMD/
 resources/processed_datasets/SWaT/
