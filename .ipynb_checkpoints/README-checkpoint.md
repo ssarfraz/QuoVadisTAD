@@ -29,9 +29,9 @@ If you use the `QuoVadisTAD` components in your research, please cite our paper 
 
 To manage the dependencies we use [Poetry](https://python-poetry.org/), though non-poetry users can also easily install. For detailed installation instructions, please see the [Installation notes](./installation_notes.md).
 
-## 2. Notebooks
+## 2. Overview
 
-### 2.1 Overview - tutorials
+### 2.1 Notebooks tutorials
 
 Two notebooks are provided as `quick-start` tutorials for running and evaluating our simple & neural network baselines on any dataset/s.
 
