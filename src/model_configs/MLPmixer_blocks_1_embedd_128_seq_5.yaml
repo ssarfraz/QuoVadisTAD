@@ -1,0 +1,12 @@
+model: Single_block_MLPMixer           
+num_blocks: 1
+preprocess: "0-1"
+input_sequence_length: 5
+embedding_dim: 128  
+dropout_rate: 0.1
+positional_encoding: False
+batch_size: 512
+epochs: 100
+optimizer: adam
+learning_rate: 0.0002
+weight_decay: 0.0001

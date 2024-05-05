@@ -1,0 +1,13 @@
+model: 1_Layer_MLP
+num_blocks: 1
+preprocess: "0-1"
+input_sequence_length: 5
+embedding_dim: 32 
+dropout_rate: 0.0
+positional_encoding: False
+batch_size: 512
+epochs: 200
+optimizer: adam
+learning_rate: 0.001
+weight_decay: 0.0001
+

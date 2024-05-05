@@ -1,61 +1,53 @@
-# Multivariate Time Series Anomaly Detection
-See the following three papers for reference on the problem, associated datasets and evaluation.
+# Quo Vadis, Unsupervised Time Series Anomaly Detection?
 
-1. [Graph Deviation Network (GDN) - Graph Neural Network-Based Anomaly Detection in Multivariate Time Series](https://arxiv.org/pdf/2106.06947.pdf)
-2. [TranAD - Deep Transformer Networks for Anomaly Detection in
-Multivariate Time Series Data](https://arxiv.org/pdf/2201.07284.pdf)
-3. [Towards a Rigorous Evaluation of Time-series Anomaly Detection](https://arxiv.org/pdf/2109.05257.pdf)
+QuoVadisTAD contains the artifacts of our position paper published at the 2024 International Conference on Machine Learning (ICML): [Quo Vadis, Unsupervised Time Series Anomaly Detection?](). We advocate for a shift towards rigorous benchmarking, rich datasets, and a nuanced understanding of model utility. Our findings debunk the myth that complexity equals superiority, showcasing the prowess of simpler, more interpretable methods. This repository aims to faciliate the course of correction by offering simple baselines, consistant benchmarking and rigorious evaluation protocols. 
 
-## Extras
+Although this project began as academic research, feedbacks from practitioners show the potential of further developing it into a Free and Open Source Software (FOSS). If you would be interested, please follow the `how to contribute` section below. Let's shape the future of **Time series Anomaly Detection (TAD)** with tools that prioritize clarity and effectiveness and make it a valuable asset for the academic research and open-source communities. 
 
-The following extras are available for this package:
-| extra string | description |
-| --- | --- |
-| dev | dependencies for deployment (like build tools) |
-| notebooks | dependencies for running local jupyter server |
-| intel | dependencies for increasing computation speed (exclusive to Intel CPUs) |
+**Citation**
 
-Extras can be installed using `poetry install --with <extra string>`, multiple extras can be installed at the same time.
-> for non-poetry-users, the same can be done with `pip install .[<extra string>]` 
+If you use the `QuoVadisTAD` components in your research, please cite our paper via:
 
-## Notebooks
-
- Notebook to get started. Loading a dataset and evaluation.
-
-* [Dataset loading and Evaluation](./notebooks/dataset_loading_and_evaluation.ipynb)
-
-* [Final best results of full evaluations of our simple methods.](./notebooks/Baselines_Evaluation_v2.ipynb)
-
-* [Final best results of full evaluations of our simple neural networks.](./notebooks/SOTA_Evaluation.ipynb)
-
-* [See other various implemented models and their training and testing. (Python Version <3.10.0)](./notebooks/models_train_test.ipynb)
+```
+@inproceedings{quovadisTAD,
+  title={Position Paper: Quo Vadis, Unsupervised Time Series Anomaly Detection?},
+  author={M. Saquib Sarfraz, Mei-Yen Chen, Lukas Layer, Kunyu Peng, Marios Koulakis},
+  booktitle={International Conference on Machine Learning},
+  pages={},
+  year={2024},
+}
+```
 
 
-### Important: Running Notebooks in Jupyter Labs:
+## 1. Installation
 
-1. `cd` to the project root (or start a terminal in that directory)
-2. run `poetry install --with notebooks` (has to be done only once) to install the required package for running jupyter
-3. run `poetry run jupyter lab` to open jupyter labs
+To manage the dependencies we use [Poetry](https://python-poetry.org/), though non-poetry users can also easily install. For detailed installation instructions, please see the [Installation notes](./installation_notes.md).
 
-> When not running the notebook kernel from the poetry env, make sure to install the package and dependencies in the kernel env manually or install package from Pypi (**not recommended** as it might not be the same version as yours).
+## 2. Notebooks
 
-Alternative for non-poetry users (not recommended):
-1. `cd` to the project root (or start a terminal in that directory)
-2. run `pip install .[notebooks]` (has to be done only once) to install the required package for running jupyter
-3. run `python -m jupyter lab` to open jupyter labs
+### 2.1 Overview - tutorials
 
-## Notes
+Two notebooks are provided as `quick-start` tutorials for running and evaluating our simple & neural network baselines on any dataset/s.
 
-* We have all five datasets i.e. WADI, SWaT, SMD, MSL and SMAP. in this repo only MSL is included because of the size limits. Other datasets are placed somewhere on the local network. please copy those into the [processed_datasets] folder.
-* TranAD repo is already included. Its [main](TranAD/main.py) function can be used to train their + some other approaches on any of the datasets.
-* We should now try out some of our ideas ...  
+* [Run Simple baselines on dataset/s and evaluate](./notebooks/Simple_Baselines_Evaluation.ipynb)
 
-## Documentation
-After running `poetry run nox`, the generated documentation can be found in the `doc` folder.
+* [Train and test Neural Network baselines](./notebooks/NN_Baselines_models_train_test.ipynb)
 
-More information on how to document the code can be found [here](https://pdoc.dev/docs/pdoc.html#how-can-i).
 
-## Contributing
+### 2.2 Datasets
+
+We use various multivariate and univariate datasets, see the paper for details. For the purpose of consistant benchmarking and evaluation, we provide the prepared datasets downloadable from this [Download Link](https://bwsyncandshare.kit.edu/s/YixoyiHx2xf8yZ9). Please note some datasets such WADI and SWaT still requires to signup an access request on the providers website, see the [readme](./resources/processed_datasets/readme.md) in the processed_datasets folder for respective copyright notices and details. After downloading the datasets please copy those into the [./resources/processed_datasets] folder.
+
+ 
+### 2.3 API Documentation
+
+In the `doc` folder, you can find the documentation about the APIs in this package. Those documents were automatically generated by running `poetry run nox` under the project folder. More information on how to document the code can be found [here](https://pdoc.dev/docs/pdoc.html#how-can-i).
+
+
+## 3. How to contribute
+
+We welcome contribution from Free and Open Source Software community. Please follow the contribution guideline below:
+
 1. create issue to resolve
 2. create branch following the naming convention `#[issue_number]_[branch_name]`
 3. clone repository using `git clone <repo-url> --recurse-submodules`

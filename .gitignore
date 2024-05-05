@@ -7,10 +7,15 @@ falcetl/
 .ruff_cache/
 
 # Temporary ignore them for development.
-notebooks/UCR_all_sets_eval.ipynb
-notebooks/dataset_loading_and_evaluation.ipynb
 notebooks/synthetic_timeseries.ipynb
-resources/paper
+
+# Datasets
+resources/processed_datasets/MSL/
+resources/processed_datasets/SMD/
+resources/processed_datasets/SWaT/
+resources/processed_datasets/WADI_112/
+resources/processed_datasets/WADI_127/
+resources/processed_datasets/UCR/
 
 # Temporary and binary files
 *~

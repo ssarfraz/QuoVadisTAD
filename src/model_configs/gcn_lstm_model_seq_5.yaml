@@ -1,0 +1,15 @@
+model: 1_Layer_GCN_LSTM   
+preprocess: "0-1"
+num_blocks: 1
+MHA_blocks: 1
+input_sequence_length: 5
+lstm_units: 64
+embedding_dim: [10]
+output_dim: [1]  # output dim. x num_sensors for node model, x sensors for seq model
+dropout_rate: 0.1
+positional_encoding: False
+batch_size: 100
+epochs: 100
+optimizer: adam
+learning_rate: 0.001
+weight_decay: 0.0001
