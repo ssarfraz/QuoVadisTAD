@@ -27,7 +27,7 @@ If you use the `QuoVadisTAD` components in your research, please cite our paper 
 
 ## 1. Installation
 
-We use [Poetry](https://python-poetry.org/) to manage the dependencies , though non-poetry users can also easily install. For detailed installation instructions, please see the [Installation notes](./installation_notes.md). 
+We use [Poetry](https://python-poetry.org/) to manage the dependencies , though non-poetry users can also easily install. For detailed installation instructions, please see the [Installation notes](./Installation_notes.md). 
 
 ## 2. Overview
 
