@@ -27,7 +27,7 @@ If you use the `QuoVadisTAD` components in your research, please cite our paper 
 
 ## 1. Installation
 
-To manage the dependencies we use [Poetry](https://python-poetry.org/), though non-poetry users can also easily install. For detailed installation instructions, please see the [Installation notes](./installation_notes.md).
+We use [Poetry](https://python-poetry.org/) to manage the dependencies , though non-poetry users can also easily install. For detailed installation instructions, please see the [Installation notes](./installation_notes.md). 
 
 ## 2. Overview
 
@@ -57,7 +57,7 @@ We welcome contribution from Free and Open Source Software community. Please fol
 1. create issue to resolve
 2. create branch following the naming convention `#[issue_number]_[branch_name]`
 3. clone repository using `git clone <repo-url> --recurse-submodules`
-4. if not already installed, [install poetry](https://python-poetry.org/docs/#installation)
+4. if Poetry has not already been installed, please follow the [Installation notes](./installation_notes.md).
 5. to install the required dependencies run `poetry install --with dev`
 7. Make your changes. To check your code and update the documentation, run `poetry run nox` and check for errors / failures.
 8. [Add](https://python-poetry.org/docs/cli/#add) new or [remove](https://python-poetry.org/docs/cli/#remove) old dependencies using [poetry](https://python-poetry.org/docs/). 

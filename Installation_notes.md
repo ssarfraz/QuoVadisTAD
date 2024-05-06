@@ -46,7 +46,7 @@ Now you can use the `poetry` command to continue the installation of this packag
 ### 1.2 Install Dependencies and execute the tutorial notebooks
 
 To install the dependencies for running the tutorial notebooks in the Jupyter WebUI:
-1. Install the dependencies using `poetry install --with notebooks`
+1. Install the dependencies with `poetry install --with notebooks`. For windows users with Intel CPUs, please use `poetry install --with notebooks --with intel`
 1. Execute the tutorial notebooks in the Jupyter WebUI `poetry run jupyter lab`
 
 Now, you should see that the Jupyter WebUI opens in a browser. On the left side, you can double-click on the notebook file that you would like to run. Jupyter WebUI offers a menu bar for you to execute the code inside the notebook's cells.
@@ -61,3 +61,10 @@ The following extras are available for this package:
 | intel | dependencies for increasing computation speed (exclusive to Intel CPUs) |
 
 Extras can be installed using `poetry install --with <extra string>`, multiple extras can be installed at the same time. For non-poetry-users, the same can be done with `pip install .[<extra string>]`.
+
+
+### 1.4 Test notes
+
+The installation instructions and tutorial notebooks have been tested in the following environments:
+* windows + intel
+* linux + amd
