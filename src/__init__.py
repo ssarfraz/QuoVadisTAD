@@ -4,7 +4,7 @@ This is the complementary software package for the position paper **QuoVadis: Un
 It contains the implementations of the baselines and evaluations in the paper.
 **TODO add more details**
 
-.. include:: ../../README.md
+.. include:: ../README.md
 """
 import os
 from pathlib import Path

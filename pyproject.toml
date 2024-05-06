@@ -1,43 +1,43 @@
 [tool.poetry]
-package-mode = false
 name = "tad"
 version = "0.1.0"
 description = "Timeseries Anomaly Detection"
 authors = [
-    "Muhammad Saquib Sarfraz <muhammad_saquib.sarfraz@mercedes-benz.com> , Marios Koulakis <marios.koulakis@kit.edu>, Mei-Yen Chen <mei-yen.chen@mercedes-benz.com>, Lukas Layer <lukas.layer@mercedes-benz.com>, Lars Jaeger <lars.jaeger@mercedes-benz.com>, Kunyu Peng <kunyu.peng@kit.edu>"] 
+    "Muhammad Saquib Sarfraz <muhammad_saquib.sarfraz@mercedes-benz.com> , Marios Koulakis <marios.koulakis@kit.edu>, Mei-Yen Chen <mei-yen.chen@mercedes-benz.com>, Lukas Layer <lukas.layer@mercedes-benz.com>, Lars Jaeger <lars.jaeger@mercedes-benz.com>, Kunyu Peng <kunyu.peng@kit.edu>"]
 license = "Proprietary"
 maintainers = [
     "Muhammad Saquib Sarfraz <muhammad_saquib.sarfraz@mercedes-benz.com>, Marios Koulakis <marios.koulakis@kit.edu>, Mei-Yen Chen <mei-yen.chen@mercedes-benz.com>"]
 readme = "README.md"
 packages = [
-    { include = "tad", from = "src" },
+    { include = "*", from = "src" },
 ]
 
 
 # --- declaring dependencies ---
+
 [tool.poetry.dependencies]
 python = "<3.12,>=3.9"
-numpy = "1.23.5"
-pandas = "1.4.2"
-plotly = "5.22.0"
-pyyaml = "6.0.1"
-scikit-learn = "1.0.2"
-scipy = "1.13.0"
-tensorflow = ">=2.9.0"
-tensorflow-addons = "^0.22.0"
-tensorflow-io-gcs-filesystem = "^0.31.0" # has to be installed separately because tensorflow metadata is not consistent
-torch = "2.1.1" 
-typer = "0.12.3"
+numpy = ">1.24,<=1.24.3" # 1.24.3 is the latest version that works with tensorflow 2.11
+pandas = "^2.1.2"
+plotly = "^5.18.0"
 tqdm = "^4.66.1"
+scikit-learn = "^1.3.2"
+scipy = "^1.11.3"
+tensorflow-io-gcs-filesystem = "^0.31.0" # has to be installed separately because tensorflow metadata is not consistent
+tensorflow = "^2.11.0"
+pyyaml = "^6.0.1"
+typer = {extras = ["all"], version = "^0.9.0"}
 pillow = "^10.1.0"
+opencv-python = "^4.8.1.78"
 matplotlib = "^3.8.2"
+torch = "2.1.1"
+
 
 
 [tool.poetry.group.dev] # Development dependencies for testing, formatting/ linting and building docs.
 optional = true
 
 [tool.poetry.group.dev.dependencies]
-pytest = "^7.4.2"
 ruff = "^0.1.1"
 nox = "^2023.4.22"
 pdoc = "^14.1.0"
@@ -47,6 +47,7 @@ optional = true
 
 [tool.poetry.group.notebooks.dependencies]
 jupyterlab = "^4.0.9"
+
 
 [tool.poetry.group.intel]
 optional = true
