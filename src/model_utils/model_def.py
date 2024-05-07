@@ -255,11 +255,15 @@ def get_model(input_shape,
         
         
     if config_data['optimizer'] == "adam":
-        optim = keras.optimizers.Adam(learning_rate=config_data['learning_rate'])
+        #optim = keras.optimizers.Adam(learning_rate=config_data['learning_rate'])
+        optim = keras.optimizers.legacy.Adam(learning_rate=config_data['learning_rate'])
     elif config_data['optimizer'] == "rmsprop":
-        optim = keras.optimizers.RMSprop(learning_rate=config_data['learning_rate'])
+        #optim = keras.optimizers.RMSprop(learning_rate=config_data['learning_rate'])
+        optim = keras.optimizers.legacy.RMSprop(learning_rate=config_data['learning_rate'])
+
     else:
-        optim = keras.optimizers.SGD(learning_rate=config_data['learning_rate'], momentum=0.9)
+        #optim = keras.optimizers.SGD(learning_rate=config_data['learning_rate'], momentum=0.9)
+        optim = keras.optimizers.legacy.SGD(learning_rate=config_data['learning_rate'], momentum=0.9)
                   
     if load_weights:
         latest_checkpoint = tf.train.latest_checkpoint(model_dir)

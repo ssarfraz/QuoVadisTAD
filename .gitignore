@@ -1,4 +1,4 @@
-docs/
+doc/
 .venv
 .*.egg-info
 falcetl/
