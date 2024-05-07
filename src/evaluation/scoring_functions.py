@@ -386,7 +386,14 @@ class Evaluator:
         """
         precision, recall, thresholds = precision_recall_curve(labels.numpy(), scores.numpy())
 
-        f_score = np.nan_to_num((1 + beta ** 2) * precision * recall / (beta ** 2 * precision + recall), nan=0)
+        numerator = (1 + beta ** 2) * precision * recall
+        denominator = beta ** 2 * precision + recall
+        f_score = np.where(
+            denominator == 0,
+            0,
+            numerator / np.where(denominator == 0, 1, denominator)
+        )
+
         best_index = np.argmax(f_score)
         area = self.auprc(labels, scores)
         if labels.numpy().sum() > 0:

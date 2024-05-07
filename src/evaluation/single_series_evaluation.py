@@ -2,8 +2,8 @@ import numpy as np
 import torch
 
 import pandas as pd
-from src.evaluation_scripts.evaluate import evaluate as evaluate_pa
-from src.evaluation_scripts.ts_evaluator import Evaluator 
+from src.evaluation.point_adjust import evaluate as evaluate_pa
+from src.evaluation.scoring_functions import Evaluator
 
 def evaluate_ts(scores, targets, eval_method='point_wise', verbose=True):
     # eval_method one of {'point_wise', 'point_adjust', 'range_wise'}
@@ -17,8 +17,7 @@ def evaluate_ts(scores, targets, eval_method='point_wise', verbose=True):
             print(df.to_string(index=False)) 
             
     else:
-       results, df = get_ts_eval(scores, targets, eval_method=eval_method, verbose=verbose) 
-      
+       results, df = get_ts_eval(scores, targets, eval_method=eval_method, verbose=verbose)
     
     return results, df
 

@@ -1,13 +1,16 @@
-import os
 import numpy as np
-import random
-import glob
-from sklearn import metrics
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from scipy.stats import iqr
 
 
-def preprocess_data(data_array: np.ndarray, test_array: np.ndarray, train_size: float, val_size: float, normalization="mean-std"):
+def preprocess_data(
+        data_array: np.ndarray,
+        test_array: np.ndarray,
+        train_size: float,
+        val_size:
+        float,
+        normalization="mean-std"
+):
     """Splits data into train/val/test sets and normalizes the data.
 
     Args:
@@ -20,8 +23,6 @@ def preprocess_data(data_array: np.ndarray, test_array: np.ndarray, train_size: 
     Returns:
         `train_array`, `val_array`, `test_array`
     """
-
-    
     if normalization == "mean-std":
         scaler = StandardScaler()
         data_array = scaler.fit_transform(data_array)
@@ -44,34 +45,30 @@ def preprocess_data(data_array: np.ndarray, test_array: np.ndarray, train_size: 
     return train_array.astype('float32'), val_array.astype('float32'), test_array.astype('float32')
 
 
-
-
 def normalise_scores(test_delta, norm="median-iqr", smooth=True, smooth_window=5):
-    '''
-    param: norm = None, "mean-std" or "median-iqr"
-    '''
+    """
+    Args:
+        norm: None, "mean-std" or "median-iqr"
+    """
 
     if norm == "mean-std":
         err_scores = StandardScaler().fit_transform(test_delta)
     elif norm == "median-iqr":
-        
         n_err_mid = np.median(test_delta, axis=0)
         n_err_iqr = iqr(test_delta, axis=0)
-        epsilon=1e-2
+        epsilon = 1e-2
 
-        err_scores = (test_delta - n_err_mid) / ( np.abs(n_err_iqr) +epsilon)
+        err_scores = (test_delta - n_err_mid) / (np.abs(n_err_iqr) + epsilon)
     else:
         err_scores = test_delta
     if smooth:
         smoothed_err_scores = np.zeros(err_scores.shape)
-        
+
         for i in range(smooth_window, len(err_scores)):
-            smoothed_err_scores[i] = np.mean(err_scores[i -  smooth_window : i + smooth_window - 1], axis=0)
+            smoothed_err_scores[i] = np.mean(err_scores[i - smooth_window: i + smooth_window - 1], axis=0)
         return smoothed_err_scores
     else:
         return err_scores
-
-
 
 
 def concatenate_windows_feat(arr, window_size=5):
@@ -95,4 +92,3 @@ def concatenate_windows_feat(arr, window_size=5):
     cat_feats = np.array(cat_feats)    
     
     return cat_feats
-
