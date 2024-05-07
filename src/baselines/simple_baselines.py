@@ -4,10 +4,10 @@ import numpy as np
 from sklearn import metrics
 from sklearn.decomposition import PCA
 
-from baselines.utils import check_timeseries_shape
+from baselines.utils import check_timeseries_shape, TADMethodEstimator
 
 
-class SensorRangeDeviation:
+class SensorRangeDeviation(TADMethodEstimator):
     def __init__(
             self,
             sensor_range: Optional[Union[tuple[np.ndarray, np.ndarray], tuple[int, int]]] = None,
@@ -25,7 +25,7 @@ class SensorRangeDeviation:
         self.sensor_range = sensor_range
         self.count_sensors = count_sensors
 
-    def fit(self, x: np.ndarray) -> None:
+    def fit(self, x: np.ndarray, univariate: bool = False, verbose: bool = False) -> None:
         check_timeseries_shape(x)
 
         if self.sensor_range is None:
@@ -48,7 +48,7 @@ class SensorRangeDeviation:
         return any_sensor_outside_range
 
 
-class LNorm:
+class LNorm(TADMethodEstimator):
     def __init__(self, ord: int = 2) -> None:
         """Computes the L^n norm as the anomaly score of a sequence. This is directly applied to the test set. The
         method defaults to the L2 norm, but the power can be changed if needed.
@@ -58,10 +58,9 @@ class LNorm:
         """
         self.ord = ord
 
-    def fit(self, x: np.ndarray) -> None:
+    def fit(self, x: np.ndarray, univariate: bool = False, verbose: bool = False) -> None:
         check_timeseries_shape(x)
-
-        print(f'No fitting applied in the L2-Norm method.')
+        pass
 
     def transform(self, x: np.ndarray) -> np.ndarray:
         check_timeseries_shape(x)
@@ -69,7 +68,7 @@ class LNorm:
         return np.linalg.norm(x, ord=self.ord, axis=1)
 
 
-class NNDistance:
+class NNDistance(TADMethodEstimator):
     def __init__(self, distance: str = 'euclidean') -> None:
         """Computes an anomaly score as the distance to the nearest neighbor in the train set.
 
@@ -79,7 +78,7 @@ class NNDistance:
         self.distance = distance
         self.train_data = None
 
-    def fit(self, x: np.ndarray) -> None:
+    def fit(self, x: np.ndarray, univariate: bool = False, verbose: bool = False) -> None:
         check_timeseries_shape(x)
 
         self.train_data = x
@@ -96,7 +95,7 @@ class NNDistance:
         return neighbor_distances.min(axis=1)
 
 
-class PCAError:
+class PCAError(TADMethodEstimator):
     def __init__(self, pca_dim: Union[int, str] = 'auto', svd_solver: str = 'full') -> None:
         """Evaluates an anomaly score as the reconstruction error from a PCA projection. Only a small number of
             components is used in order to remove information and the PCA parameters are fit on the train set.
@@ -114,27 +113,37 @@ class PCAError:
         else:
             self.pca = PCA(n_components=self.pca_dim, svd_solver=self.svd_solver)
 
-    def fit(self, x: np.ndarray) -> None:
+    def fit(self, x: np.ndarray, univariate: bool = False, verbose: bool = False) -> None:
+        check_timeseries_shape(x)
+
         if self.pca_dim == 'auto':
             n_features = x.shape[1]
-            if n_features == 1:
+            if univariate:
                 dim = 2
             elif n_features <= 50:
                 dim = 10
             else:
                 dim = 30
 
+            if dim > x.shape[1]:
+                # If the number of components is too large, then use a simple heuristic to select it.
+                old_dim = dim
+                dim = min(max(2, x.shape[1] // 5), x.shape[1])
+                print(f'Adjusting estimated number of PCA components from {old_dim} to {dim}.')
+
             self.pca = PCA(n_components=dim, svd_solver=self.svd_solver)
         self.pca.fit(x)
 
     def transform(self, x: np.ndarray) -> np.ndarray:
+        check_timeseries_shape(x)
+
         latent = self.pca.transform(x)
         reconstructed = self.pca.inverse_transform(latent)
 
         return np.abs(x - reconstructed)
 
 
-class Random:
+class Random(TADMethodEstimator):
     def __init__(self, seed: Optional[int] = None) -> None:
         """The method randomly selects an anomaly value of 0 or 1 per timestamp. The method does not make sense in any
         practical setting, but it is useful to expose issues in scoring, for example when using F1 score with
@@ -145,13 +154,16 @@ class Random:
         """
         self.seed = seed
 
-    def fit(self, x: np.ndarray) -> None:
-
+    def fit(self, x: np.ndarray, univariate: bool = False, verbose: bool = False) -> None:
         check_timeseries_shape(x)
-
-        print(f'No fitting applied in the random method.')
         pass
 
     def transform(self, x: np.ndarray) -> np.ndarray:
+        check_timeseries_shape(x)
         np.random.seed(self.seed)
-        return np.random.randint(low=0, high=2, size=x.shape[0])
+
+        return np.random.randint(
+            low=0,
+            high=2,
+            size=x.shape[0]
+        )

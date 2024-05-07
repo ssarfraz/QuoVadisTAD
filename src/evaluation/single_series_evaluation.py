@@ -42,7 +42,5 @@ def get_ts_eval(scores, targets, eval_method='point_wise', verbose=True):
     score_dict= {'': metrics_name, eval_method: raw}    
           
     df = pd.DataFrame(score_dict)
-    
-    if verbose: 
-        print(df.to_string(index=False))   
+
     return results, df

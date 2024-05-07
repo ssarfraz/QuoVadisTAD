@@ -7,8 +7,7 @@ def preprocess_data(
         data_array: np.ndarray,
         test_array: np.ndarray,
         train_size: float,
-        val_size:
-        float,
+        val_size: float,
         normalization="mean-std"
 ):
     """Splits data into train/val/test sets and normalizes the data.
@@ -26,11 +25,11 @@ def preprocess_data(
     if normalization == "mean-std":
         scaler = StandardScaler()
         data_array = scaler.fit_transform(data_array)
-        test_array  = scaler.transform(test_array)
+        test_array = scaler.transform(test_array)
     elif normalization == "0-1":
         scaler = MinMaxScaler()
         data_array = scaler.fit_transform(data_array)
-        test_array  = scaler.transform(test_array)
+        test_array = scaler.transform(test_array)
     else:
         pass
         print(f'returning raw data')
@@ -41,7 +40,7 @@ def preprocess_data(
         int(num_time_steps * val_size),
     )
     train_array = data_array[:num_train]
-    val_array = data_array[num_train : (num_train + num_val)]
+    val_array = data_array[num_train: (num_train + num_val)]
     return train_array.astype('float32'), val_array.astype('float32'), test_array.astype('float32')
 
 
@@ -50,7 +49,6 @@ def normalise_scores(test_delta, norm="median-iqr", smooth=True, smooth_window=5
     Args:
         norm: None, "mean-std" or "median-iqr"
     """
-
     if norm == "mean-std":
         err_scores = StandardScaler().fit_transform(test_delta)
     elif norm == "median-iqr":
@@ -72,7 +70,6 @@ def normalise_scores(test_delta, norm="median-iqr", smooth=True, smooth_window=5
 
 
 def concatenate_windows_feat(arr, window_size=5):
-
     i = 0
     # Initialize an empty list to store
     arr = np.vstack([np.repeat(arr[0][None, :], window_size - 1, axis=0), arr])

@@ -13,13 +13,21 @@ def evaluate_baselines_on_all_paper_datasets(
 ):
 
     if dataset_names is None:
-        dataset_names = ['swat', 'wadi_127', 'wadi_112', 'smd', 'msl', 'smap', 'ucr_IB']
+        dataset_names = [
+            'swat',
+            'wadi_127',
+            'wadi_112',
+            'smd',
+            'msl',
+            'smap',
+            'ucr_IB'
+        ]
 
     if verbose:
         print(f'[INFO]: Evaluating {len(dataset_names)} datasets')
 
     datasets_dict = {
-        dataset_name: {'train': data[0], 'test': data[1], 'labels': data[2]}
+        dataset_name.upper(): {'train': data[0], 'test': data[1], 'labels': data[2]}
         for dataset_name in dataset_names
         for data in [datasets[dataset_name](root_path)]  # Trick to get the single value as a variable 'data'.
     }

@@ -4,7 +4,8 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from src.evaluation.evaluation_utils import get_normalise_scores
+from src.evaluation.single_series_evaluation import evaluate_ts
+from src.evaluation.evaluation_utils import get_results_for_all_score_normalizations
 from src.dataset_utils.data_utils import preprocess_data, concatenate_windows_feat
 
 
@@ -15,6 +16,7 @@ def evaluate_methods(
         labels,
         score_normalization: str = 'optimal',
         eval_method='point_wise',
+        univariate: bool = False,
         verbose=False
 ):
     """Evaluates multiple methods on a single dataset. For each method:
@@ -30,29 +32,39 @@ def evaluate_methods(
         test_labels = labels
 
     dfs_per_method: list[tuple[Optional[str], pd.DataFrame]] = []
-    progress_bar = tqdm(methods.items(), total=len(methods), disable=not verbose)
 
-    for name, method in progress_bar:
-        progress_bar.set_description(f'Evaluating {name}')
-
-        method.fit(train_array)
+    for name, method in methods.items():
+        method.fit(train_array, verbose=verbose, univariate=univariate)
         anomaly_scores = method.transform(test_array)
 
-        dfs_all_normalizations, df_best_normalization = get_normalise_scores(
-            anomaly_scores,
-            test_labels,
-            eval_method=eval_method
-        )
+        score_normalizations_applicable = (len(anomaly_scores.shape) > 1) and (anomaly_scores.shape[1] > 1)
 
-        if score_normalization == 'all':
-            dfs_per_method.extend([
-                (f'{name} ({normalization_name} norm)', df)
-                for normalization_name, df in dfs_all_normalizations.items()
-            ])
-        elif score_normalization == 'optimal':
-            dfs_per_method.append((str(name), df_best_normalization))
+        if score_normalizations_applicable:
+            dfs_all_normalizations, df_best_normalization = get_results_for_all_score_normalizations(
+                anomaly_scores,
+                test_labels,
+                eval_method=eval_method
+            )
+
+            if score_normalization == 'all':
+                dfs_per_method.extend([
+                    (f'{name} ({normalization_name} norm)', df)
+                    for normalization_name, df in dfs_all_normalizations.items()
+                ])
+            elif score_normalization == 'optimal':
+                dfs_per_method.append((str(name), df_best_normalization))
+            else:
+                dfs_per_method.append((str(name), dfs_all_normalizations[score_normalization]))
+
         else:
-            dfs_per_method.append((str(name), dfs_all_normalizations[score_normalization]))
+            _, df_no_normalization = evaluate_ts(
+                anomaly_scores,
+                test_labels,
+                eval_method=eval_method,
+                verbose=verbose
+            )
+
+            dfs_per_method.append((str(name), df_no_normalization))
 
     extended_method_names, score_dfs = zip(*dfs_per_method)
 
@@ -83,7 +95,8 @@ def evaluate_methods_on_dataset_or_traces(
 
     if series_are_split_in_traces:
         df = []
-        for i in range(len(train)):
+
+        for i in tqdm(list(range(len(train))), disable=not verbose):
             trace_train, _, trace_test = preprocess_data(
                 train[i],
                 test[i],
@@ -92,9 +105,12 @@ def evaluate_methods_on_dataset_or_traces(
                 normalization=data_normalization,
             )
             if trace_train.shape[1] == 1:  # check if univariate timeseries
+                univariate = True
                 # use windowed_features
                 trace_train = concatenate_windows_feat(trace_train, window_size=5)
                 trace_test = concatenate_windows_feat(trace_test, window_size=5)
+            else:
+                univariate = False
 
             df_i = evaluate_methods(
                 methods,
@@ -103,12 +119,14 @@ def evaluate_methods_on_dataset_or_traces(
                 labels[i],
                 score_normalization=score_normalization,
                 eval_method=eval_method,
+                univariate=univariate,
                 verbose=verbose
             )
 
             df.append(df_i)
         df = pd.concat(df, ignore_index=False, axis=1)
         df = df.groupby(level=0, axis=1, sort=False).apply(lambda x: x.mean(1))
+
     else:
         train, _, test = preprocess_data(
             train,
@@ -118,8 +136,11 @@ def evaluate_methods_on_dataset_or_traces(
             normalization=data_normalization
         )
         if train.shape[1] == 1:  # check if univariate timeseries
+            univariate = True
             train = concatenate_windows_feat(train, window_size=5)
             test = concatenate_windows_feat(test, window_size=5)
+        else:
+            univariate = False
 
         df = evaluate_methods(
             methods,
@@ -128,6 +149,7 @@ def evaluate_methods_on_dataset_or_traces(
             labels,
             score_normalization=score_normalization,
             eval_method=eval_method,
+            univariate=univariate,
             verbose=verbose
         )
 
