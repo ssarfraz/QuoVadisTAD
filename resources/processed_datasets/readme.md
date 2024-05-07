@@ -1,5 +1,5 @@
 # Datasets
-We use the following multivariate and univariate datasets, see the paper for more details.
+We use the following multivariate and univariate datasets, see the paper for more details. For the purpose of consistant benchmarking and evaluation, we provide the prepared datasets (excluding WADI and SWaT) downloadable from this [Download Link](https://bwsyncandshare.kit.edu/s/ddPLrfokJQY7YCG).
 
 
 ## SMD Datasets
@@ -14,6 +14,8 @@ Su, Ya, Youjian Zhao, Chenhao Niu, Rong Liu, Wei Sun, and Dan Pei. "Robust anoma
 The industrial SWaT and WADI multivariate datasets belong to [iTRUST](https://itrust.sutd.edu.sg/). 
 
 The application of data access and the details of the datasets can be found at [iTrust here](https://itrust.sutd.edu.sg/itrust-labs_datasets/dataset_info/#wadi)
+
+For consistant benchmarking and reference, we will provide the versions used and preparation scripts which we followed from [here](https://github.com/d-ailin/GDN/tree/main/scripts)
 
 ## UCR/InternalBleeding Datasets
 
