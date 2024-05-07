@@ -9,9 +9,9 @@ from baselines.utils import check_timeseries_shape, TADMethodEstimator
 
 class SensorRangeDeviation(TADMethodEstimator):
     def __init__(
-            self,
-            sensor_range: Optional[Union[tuple[np.ndarray, np.ndarray], tuple[int, int]]] = None,
-            count_sensors: bool = False
+        self,
+        sensor_range: Optional[Union[tuple[np.ndarray, np.ndarray], tuple[int, int]]] = None,
+        count_sensors: bool = False
     ) -> None:
         """Deviation from the usual range of the sensors. The ranges are either provided or else are computed on the
         training dataset as the minimum and maximum values of each sensor. The total anomaly score across sensors is
