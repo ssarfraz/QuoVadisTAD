@@ -1,20 +1,15 @@
-import os
 import numpy as np
 import pandas as pd
-import random
-import glob
-
-from sklearn import metrics
 
 from src.dataset_utils.dataset_reader import datasets
 from src.dataset_utils.data_utils import preprocess_data, normalise_scores, concatenate_windows_feat
 
 from src.evaluation_scripts.evaluate_ts import evaluate_ts
-from sklearn.decomposition import PCA
+
 import warnings
 warnings.filterwarnings("ignore")
 
-
+from baselines import simple_baselines
 
 
 def get_normalise_scores(scores, test_labels, eval_method=None):
@@ -78,8 +73,6 @@ def run_baselines(data,
     return res, df
 
 
-
-
 def evaluate_baselines(train_array,
                        test_array,
                        labels,
@@ -93,38 +86,51 @@ def evaluate_baselines(train_array,
         test_labels = labels.max(1)
     else:
         test_labels = labels
-    
-    
-    
+
     # Baseline-1: Sensor range deviation
-    m1 = 1 * (test_array > 1)
-    m2 = 1 * (test_array < 0)
-    mask = m1 + m2
-    ano_sens_cand = mask.sum(1)   
-    results_1, df_1 = evaluate_ts(ano_sens_cand > 0, test_labels,
-                               eval_method=eval_method, verbose=verbose)
-    
+    sensor_deviation = simple_baselines.SensorRangeDeviation(sensor_range=(0, 1))
+    sensor_deviation.fit(train_array)
+    anomaly_scores = sensor_deviation.transform(test_array)
+
+    results_1, df_1 = evaluate_ts(
+        anomaly_scores,
+        test_labels,
+        eval_method=eval_method,
+        verbose=verbose
+    )
+
     # Baseline-2: L2 norm
-    results_2, df_2 = evaluate_ts(np.linalg.norm(test_array, 2, axis=1),
-                               test_labels, eval_method=eval_method, verbose=verbose)
-    
+    l2norm = simple_baselines.LNorm(ord=2)
+    anomaly_scores = l2norm.transform(test_array)
+
+    results_2, df_2 = evaluate_ts(
+        anomaly_scores,
+        test_labels,
+        eval_method=eval_method,
+        verbose=verbose
+    )
+
     # Baseline-3: 1-NN distance - closest distance to train timestamp
-    scores = metrics.pairwise.pairwise_distances(test_array, train_array, metric=distance)
-    results_3, df_3 = evaluate_ts(scores.min(1), test_labels, eval_method=eval_method, verbose=verbose)
-    
-    # Baseline 3_3: distance to train mean (fast and often very good as well)
-    #scores = metrics.pairwise.pairwise_distances(test_array, train_array.mean(0)[None, :], metric=distance)                                             
-    #results_2, df_2 = evaluate_ts(scores, test_labels, eval_method=eval_method, verbose=verbose)
-    
-    
+    nn_distance = simple_baselines.NNDistance(distance=distance)
+    nn_distance.fit(train_array)
+    anomaly_scores = nn_distance.transform(test_array)
+
+    results_3, df_3 = evaluate_ts(
+        anomaly_scores,
+        test_labels,
+        eval_method=eval_method,
+        verbose=verbose
+    )
+
     # Baseline-4: PCA-Error
-    pca = PCA(n_components=pca_dim, svd_solver='full')
+    pca = simple_baselines.PCAError(pca_dim=pca_dim, svd_solver='full')
     pca.fit(train_array)
-    t_pca = pca.transform(test_array)
-    inv_pca = pca.inverse_transform(t_pca)
-    scores_pca = np.abs(inv_pca - test_array)
-        
-    result_list, df_list, results_4, df_4 = get_normalise_scores(scores_pca, test_labels, eval_method=eval_method)
+    anomaly_scores = pca.transform(test_array)
+
+    result_list, df_list, results_4, df_4 = get_normalise_scores(
+        anomaly_scores,
+        test_labels,
+        eval_method=eval_method)
     
     if show_norm_impact:
         res = [results_1, results_2, results_3] + result_list
@@ -147,10 +153,8 @@ def evaluate_baselines(train_array,
                      'PCA_Error',
                  ]
 
-
     cf = pd.concat(dfs, ignore_index=False, axis=1)
 
-    
     score_dict = {'F1': cf[eval_method].iloc[0].tolist(),
                   'P':cf[eval_method].iloc[1].tolist(),
                   'R':cf[eval_method].iloc[2].tolist(),
@@ -158,8 +162,6 @@ def evaluate_baselines(train_array,
                  }
     df_f = pd.DataFrame(score_dict, index=baselines)
     return res, df_f
-
-
 
 
 def evaluate_datasets(root_path,
@@ -208,9 +210,6 @@ def evaluate_datasets(root_path,
                  print(f' Evaluation on {dataset_name} finished')
     
     return results, pd.concat(df_comb, ignore_index=False, axis=1)
-
-
-
 
 
 if __name__ == '__main__':
