@@ -15,9 +15,6 @@ The industrial SWaT and WADI multivariate datasets belong to [iTRUST](https://it
 
 The application of data access and the details of the datasets can be found at [iTrust here](https://itrust.sutd.edu.sg/itrust-labs_datasets/dataset_info/#wadi)
 
-For consistant benchmarking and reference, We include only the extracted features used in our benchmarks without the orignal dataset and meta data. Please complete the iTrust access form before use.
-
-
 ## UCR/InternalBleeding Datasets
 
 These univariate datasets are taken as is from https://compete.hexagon-ml.com/practice/competition/39/ 
