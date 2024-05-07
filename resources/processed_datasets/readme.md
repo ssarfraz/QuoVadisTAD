@@ -1,5 +1,5 @@
 # Datasets
-We use the following multivariate and univariate datasets, see the paper for more details. For the purpose of consistant benchmarking and evaluation, we provide the prepared datasets downloadable from this [Download Link](https://bwsyncandshare.kit.edu/s/YixoyiHx2xf8yZ9).
+We use the following multivariate and univariate datasets, see the paper for more details.
 
 
 ## SMD Datasets
