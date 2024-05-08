@@ -13,12 +13,11 @@ def evaluate_ts(scores, targets, eval_method='point_wise', verbose=True):
         df = df.drop(['without_PA'], axis=1)
         df = df.drop(3)
         df = df.rename(columns={'with_PA': eval_method})
-        if verbose: 
-            print(df.to_string(index=False)) 
-            
+        
     else:
        results, df = get_ts_eval(scores, targets, eval_method=eval_method, verbose=verbose)
-    
+    if verbose: 
+            print(df.to_string(index=False)) 
     return results, df
 
 
