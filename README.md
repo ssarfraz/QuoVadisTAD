@@ -35,7 +35,7 @@ We use [Poetry](https://python-poetry.org/) to manage the dependencies , though 
 
 Two notebooks are provided as `quick-start` tutorials for running and evaluating our simple & neural network baselines on any dataset/s.
 
-* [Evaluate and visualize simple baselines on a custom dataset](./notebooks/simple_baselines_evaluation.ipynb)
+* [Evaluate and visualize simple baselines on a custom dataset](./notebooks/simple_baselines_example_usage.ipynb)
 
 * [Run Simple baselines on dataset/s and evaluate](./notebooks/simple_baselines_evaluation.ipynb)
 
