@@ -3,7 +3,7 @@ from src.dataset_utils.dataset_reader import datasets
 from src.baselines import simple_baselines
 
 
-def evaluate_baselines_on_all_paper_datasets(
+def evaluate_simple_baselines_on_all_paper_datasets(
     root_path,
     data_normalization='0-1',
     eval_method='point_wise',
@@ -51,7 +51,7 @@ def evaluate_baselines_on_all_paper_datasets(
 
 if __name__ == '__main__':
     root_path = '../../QuoVadisTAD'
-    df = evaluate_baselines_on_all_paper_datasets(
+    df = evaluate_simple_baselines_on_all_paper_datasets(
         root_path,
         data_normalization='0-1',
         eval_method='point_wise',

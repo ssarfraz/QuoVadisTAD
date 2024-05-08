@@ -125,7 +125,8 @@ def evaluate_methods_on_dataset_or_traces(
 
             df.append(df_i)
         df = pd.concat(df, ignore_index=False, axis=1)
-        df = df.groupby(level=0, axis=1, sort=False).apply(lambda x: x.mean(1))
+
+        df = df.T.groupby(level=0, sort=False).mean().T
 
     else:
         train, _, test = preprocess_data(
