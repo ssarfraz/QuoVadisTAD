@@ -4,7 +4,7 @@ import numpy as np
 from sklearn import metrics
 from sklearn.decomposition import PCA
 
-from baselines.utils import check_timeseries_shape, TADMethodEstimator
+from src.baselines.utils import check_timeseries_shape, TADMethodEstimator
 
 
 class SensorRangeDeviation(TADMethodEstimator):
