@@ -1,6 +1,6 @@
-from src.evaluation.evaluation import evaluate_methods_on_datasets
-from src.dataset_utils.dataset_reader import datasets
-from src.baselines import simple_baselines
+from quovadis_tad.evaluation.evaluation import evaluate_methods_on_datasets
+from quovadis_tad.dataset_utils.dataset_reader import datasets
+from quovadis_tad.baselines import simple_baselines
 
 
 def evaluate_simple_baselines_on_all_paper_datasets(

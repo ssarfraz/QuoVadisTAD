@@ -2,8 +2,8 @@ import numpy as np
 import torch
 
 import pandas as pd
-from src.evaluation.point_adjust import evaluate as evaluate_pa
-from src.evaluation.scoring_functions import Evaluator
+from quovadis_tad.evaluation.point_adjust import evaluate as evaluate_pa
+from quovadis_tad.evaluation.scoring_functions import Evaluator
 
 def evaluate_ts(scores, targets, eval_method='point_wise', verbose=False):
     # eval_method one of {'point_wise', 'point_adjust', 'range_wise'}

@@ -3,8 +3,8 @@ from typing import Optional
 import numpy as np
 import pandas as pd
 
-from src.dataset_utils.data_utils import normalise_scores
-from src.evaluation.single_series_evaluation import evaluate_ts
+from quovadis_tad.dataset_utils.data_utils import normalise_scores
+from quovadis_tad.evaluation.single_series_evaluation import evaluate_ts
 
 
 def get_results_for_all_score_normalizations(

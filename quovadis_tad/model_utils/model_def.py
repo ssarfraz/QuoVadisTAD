@@ -6,11 +6,11 @@ import yaml
 import tensorflow as tf
 from tensorflow import keras
 from tensorflow.keras import layers
-from src.dataset_utils.dataset_reader import datasets
-from src.dataset_utils.data_utils import preprocess_data, concatenate_windows_feat
-from src.model_utils.tf_data_loader import create_tf_dataset
+from quovadis_tad.dataset_utils.dataset_reader import datasets
+from quovadis_tad.dataset_utils.data_utils import preprocess_data, concatenate_windows_feat
+from quovadis_tad.model_utils.tf_data_loader import create_tf_dataset
 from tensorflow.keras.preprocessing import timeseries_dataset_from_array
-from src.model_utils.gnn import get_graph_info, LSTMGC
+from quovadis_tad.model_utils.gnn import get_graph_info, LSTMGC
 
 
 module_path = str(Path.cwd().parents[1])
@@ -387,7 +387,7 @@ def test_embedder(module_path,
                          'Single_Transformer_block': 'Transformer_blocks_1_1_embedd_128_seq_5.yaml',
                          '1_Layer_GCN_LSTM': 'gcn_lstm_model_seq_5.yaml'}
     config_name = nn_baselines_dict[model_name]
-    config_path = Path(module_path, 'src', 'model_configs', config_name)
+    config_path = Path(module_path, 'quovadis_tad', 'model_configs', config_name)
     #config_name = os.path.basename(config_path)
     # Read config
     with open(config_path) as f:

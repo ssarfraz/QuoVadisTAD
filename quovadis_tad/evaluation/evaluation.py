@@ -4,9 +4,9 @@ import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
-from src.evaluation.single_series_evaluation import evaluate_ts
-from src.evaluation.evaluation_utils import get_results_for_all_score_normalizations
-from src.dataset_utils.data_utils import preprocess_data, concatenate_windows_feat, normalise_scores
+from quovadis_tad.evaluation.single_series_evaluation import evaluate_ts
+from quovadis_tad.evaluation.evaluation_utils import get_results_for_all_score_normalizations
+from quovadis_tad.dataset_utils.data_utils import preprocess_data, concatenate_windows_feat, normalise_scores
 
 
 def evaluate_methods(
