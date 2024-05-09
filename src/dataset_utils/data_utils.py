@@ -57,8 +57,11 @@ def normalise_scores(test_delta, norm="median-iqr", smooth=True, smooth_window=5
         epsilon = 1e-2
 
         err_scores = (test_delta - n_err_mid) / (np.abs(n_err_iqr) + epsilon)
-    else:
+    elif norm is None:
         err_scores = test_delta
+    else:
+        raise ValueError('specified normalisation not implemented, please use one of {None, "mean-std", "median-iqr"}')    
+    
     if smooth:
         smoothed_err_scores = np.zeros(err_scores.shape)
 

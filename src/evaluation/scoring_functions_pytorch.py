@@ -1,11 +1,3 @@
-import numpy as np
-from sklearn.metrics import roc_auc_score, f1_score, precision_recall_curve, auc
-from typing import List, Any, Dict, Tuple, Callable, Optional
-
-'''
-Numpy implementation of torch based evualtion from TiemseAD (https://github.com/wagner-d/TimeSeAD)
-'''
-
 """
 MIT License
 
@@ -31,87 +23,146 @@ SOFTWARE.
 """
 
 
-def constant_bias_fn(inputs: np.ndarray) -> float:
-    """
+from typing import List, Callable, Tuple, Dict, Optional, Any
+
+import numpy as np
+import torch
+from sklearn.metrics import roc_auc_score, f1_score, precision_recall_curve, auc
+
+
+
+## Auxillary fns ts_precision_recall
+
+def constant_bias_fn(inputs: torch.Tensor) -> float:
+    r"""
     Compute the overlap size for a constant bias function that assigns the same weight to all positions.
 
-    This function computes the average of the input values.
+    This functions computes
 
-    :param inputs: A 1-D numpy array containing the predictions inside a ground-truth window.
-    :return: The overlap, which is the average of the input values.
-    """
-    return np.sum(inputs) / inputs.shape[0]
+    .. math::
+        \omega(\text{inputs}) = \frac{1}{n} \sum_{i = 1}^{n} \text{inputs}_i,
 
-def back_bias_fn(inputs: np.ndarray) -> float:
+    where :math:`n = \lvert \text{inputs} \rvert`.
+
+    .. note::
+       To improve the runtime of our algorithm, we calculate the overlap :math:`\omega` directly as part of the bias
+       function.
+
+    :param inputs: A 1-D :class:`~torch.Tensor` containing the predictions inside a ground-truth window.
+    :return: The overlap :math:`\omega`.
     """
-    Compute the overlap size for a bias function that assigns more weight to predictions towards the back of a
+    return torch.sum(inputs).item() / inputs.shape[0]
+
+
+def back_bias_fn(inputs: torch.Tensor) -> float:
+    r"""
+    Compute the overlap size for a bias function that assigns the more weight to predictions towards the back of a
     ground-truth anomaly window.
 
-    This function computes the weighted average of the input values, where the weights increase linearly towards
-    the end of the input array.
+    This functions computes
+
+    .. math::
+        \omega(\text{inputs}) = \frac{2}{n * (n + 1)} \sum_{i = 1}^{n} \text{inputs}_i \cdot i,
+
+    where :math:`n = \lvert \text{inputs} \rvert`.
+
+    .. note::
+       To improve the runtime of our algorithm, we calculate the overlap :math:`\omega` directly as part of the bias
+       function.
+
+    :param inputs: A 1-D :class:`~torch.Tensor` containing the predictions inside a ground-truth window.
+    :return: The overlap :math:`\omega`.
+    """
+    n = inputs.shape[0]
+    res = torch.dot(inputs, torch.arange(1, n + 1, dtype=inputs.dtype, device=inputs.device)).item()
+    res /= (n * (n + 1)) // 2  # sum of numbers 1, ..., n
+    return res
+
+
+def front_bias_fn(inputs: torch.Tensor) -> float:
+    r"""
+    Compute the overlap size for a bias function that assigns the more weight to predictions towards the front of a
+    ground-truth anomaly window.
+
+    This functions computes
+
+    .. math::
+        \omega(\text{inputs}) = \frac{2}{n * (n + 1)} \sum_{i = 1}^{n} \text{inputs}_i \cdot (n + 1 - i),
+
+    where :math:`n = \lvert \text{inputs} \rvert`.
+
+    .. note::
+       To improve the runtime of our algorithm, we calculate the overlap :math:`\omega` directly as part of the bias
+       function.
+
+    :param inputs: A 1-D :class:`~torch.Tensor` containing the predictions inside a ground-truth window.
+    :return: The overlap :math:`\omega`.
+    """
+    n = inputs.shape[0]
+    res = torch.dot(inputs, torch.arange(n, 0, -1, dtype=inputs.dtype, device=inputs.device)).item()
+    res /= (n * (n + 1)) // 2  # sum of numbers 1, ..., n
+    return res
+
+
+def middle_bias_fn(inputs: torch.Tensor) -> float:
+    r"""
+    Compute the overlap size for a bias function that assigns the more weight to predictions in the middle of a
+    ground-truth anomaly window.
+
+    This functions computes
+
+    .. math::
+        \omega(\text{inputs}) = \frac{2}{m * (m + 1) + (n - m) * (n - m + 1)} \sum_{i = 1}^{n} \text{inputs}_i \cdot
+        \begin{cases}
+            i & \text{if } i \leq m\\
+            (n + 1 - i) & \text{otherwise}
+        \end{cases},
+
+    where :math:`n = \lvert \text{inputs} \rvert` and :math:`m = \lceil \frac{n}{2} \rceil`.
+
+    .. note::
+       To improve the runtime of our algorithm, we calculate the overlap :math:`\omega` directly as part of the bias
+       function.
     
-    :param inputs: A 1-D numpy array containing the predictions inside a ground-truth window.
-    :return: The overlap, which is the weighted average of the input values.
+    :param inputs: A 1-D :class:`~torch.Tensor` containing the predictions inside a ground-truth window.
+    :return: The overlap :math:`\omega`.
     """
     n = inputs.shape[0]
-    weights = np.arange(1, n + 1)
-    res = np.dot(inputs, weights)
-    return res / ((n * (n + 1)) // 2)
+    result = torch.empty_like(inputs)
+    middle, remainder = divmod(n, 2)
+    middle2 = middle + remainder
+    torch.arange(1, middle + 1, out=result[:middle], dtype=result.dtype, device=result.device)
+    torch.arange(middle2, 0, -1, out=result[-middle2:], dtype=result.dtype, device=result.device)
+    result = torch.dot(inputs, result).item()
+    result /= (middle * (middle + 1) + middle2 * (middle2 + 1)) // 2
+    return result
 
-def front_bias_fn(inputs: np.ndarray) -> float:
-    """
-        Compute the overlap size for a bias function that assigns more weight to predictions towards the front of a
-    ground-truth anomaly window.
-
-    This function computes the weighted average of the input values, where the weights decrease linearly towards
-    the end of the input array.
-
-    :param inputs: A 1-D numpy array containing the predictions inside a ground-truth window.
-    :return: The overlap, which is the weighted average of the input values
-    """
-    n = inputs.shape[0]
-    weights = np.arange(n, 0, -1)
-    res = np.dot(inputs, weights)
-    return res / ((n * (n + 1)) // 2)
-
-def middle_bias_fn(inputs: np.ndarray) -> float:
-    """
-    Compute the overlap size for a bias function that assigns more weight to predictions in the middle of a
-    ground-truth anomaly window.
-
-    This function computes the weighted average of the input values, where the weights are higher in the middle
-    of the input array and decrease towards the ends.
-
-    :param inputs: A 1-D numpy array containing the predictions inside a ground-truth window.
-    :return: The overlap, which is the weighted average of the input values.
-    """
-    n = inputs.shape[0]
-    middle = n // 2
-    weights = np.concatenate((np.arange(1, middle + 1), np.arange(n // 2 + n % 2, 0, -1)))
-    weighted_sum = np.dot(inputs, weights)
-    normalization_factor = (middle * (middle + 1) + (middle + n % 2) * (middle + n % 2 + 1)) // 2
-    return weighted_sum / normalization_factor
 
 def inverse_proportional_cardinality_fn(cardinality: int, gt_length: int) -> float:
-    """
+    r"""
     Cardinality function that assigns an inversely proportional weight to predictions within a single ground-truth
     window.
-    
-    This is the default cardinality function recommended in [Tatbul2018]
+
+    This is the default cardinality function recommended in [Tatbul2018]_.
+
+    .. note::
+       This function leads to a metric that is not recall-consistent! Please see [Wagner2023]_ for more details.
+
+    :param cardinality: Number of predicted windows that overlap the ground-truth window in question.
+    :param gt_length: Length of the ground-truth window (unused).
+    :return: The cardinality factor :math:`\frac{1}{\text{cardinality}}`.
+
     .. [Tatbul2018] N. Tatbul, T.J. Lee, S. Zdonik, M. Alam, J. Gottschlich.
         Precision and recall for time series. Advances in neural information processing systems. 2018;31.
     .. [Wagner2023] D. Wagner, T. Michels, F.C.F. Schulz, A. Nair, M. Rudolph, and M. Kloft.
         TimeSeAD: Benchmarking Deep Multivariate Time-Series Anomaly Detection.
         Transactions on Machine Learning Research (TMLR), (to appear) 2023.
-    
-    :param cardinality: Number of predicted windows that overlap the ground-truth window in question.
-    :param gt_length: Length of the ground-truth window (unused).
-    :return: The cardinality factor 1/cardinality, with a minimum value of 1.
     """
     return 1 / max(1, cardinality)
 
+
 def improved_cardinality_fn(cardinality: int, gt_length: int):
-    """
+    r"""
     Recall-consistent cardinality function introduced by [Wagner2023]_ that assigns lower weight to ground-truth windows
     that overlap with many predicted windows.
 
@@ -119,38 +170,39 @@ def improved_cardinality_fn(cardinality: int, gt_length: int):
 
     .. math::
         \left(\frac{\text{gt_length} - 1}{\text{gt_length}}\right)^{\text{cardinality} - 1}.
-    
-    .. [Wagner2023] D. Wagner, T. Michels, F.C.F. Schulz, A. Nair, M. Rudolph, and M. Kloft.
-        TimeSeAD: Benchmarking Deep Multivariate Time-Series Anomaly Detection.
-        Transactions on Machine Learning Research (TMLR), (to appear) 2023.
-        
+
     :param cardinality: Number of predicted windows that overlap the ground-truth window in question.
     :param gt_length: Length of the ground-truth window.
     :return: The cardinality factor.
     """
     return ((gt_length - 1) / gt_length) ** (cardinality - 1)
 
-def compute_window_indices(binary_labels: np.ndarray) -> List[Tuple[int, int]]:
+
+def compute_window_indices(binary_labels: torch.Tensor) -> List[Tuple[int, int]]:
     """
     Compute a list of indices where anomaly windows begin and end.
 
-    :param binary_labels: A 1-D numpy array containing 1 for an anomalous time step or 0 otherwise.
-    :return: A list of tuples (start, end) for each anomaly window in binary_labels, where start is the
-        index at which the window starts and end is the first index after the end of the window.
+    :param binary_labels: A 1-D :class:`~torch.Tensor` containing ``1`` for an anomalous time step or ``0`` otherwise.
+    :return: A list of tuples ``(start, end)`` for each anomaly window in ``binary_labels``, where ``start`` is the
+        index at which the window starts and ``end`` is the first index after the end of the window.
     """
-    # Compute the differences between consecutive elements
-    differences = np.diff(binary_labels, prepend=0)
-    # Find the indices where the differences are non-zero (start and end of windows)
-    indices = np.nonzero(differences)[0]
-    # If the number of indices is odd, append the last index
+    boundaries = torch.empty_like(binary_labels)
+    boundaries[0] = 0
+    boundaries[1:] = binary_labels[:-1]
+    boundaries *= -1
+    boundaries += binary_labels
+    # boundaries will be 1 where a window starts and -1 at the end of a window
+
+    indices = torch.nonzero(boundaries, as_tuple=True)[0].tolist()
     if len(indices) % 2 != 0:
-        indices = np.append(indices, binary_labels.size)
-    # Pair the start and end indices
-    window_indices = [(indices[i], indices[i + 1]) for i in range(0, len(indices), 2)]
+        # Add the last index as the end of a window if appropriate
+        indices.append(binary_labels.shape[0])
+    indices = [(indices[i], indices[i + 1]) for i in range(0, len(indices), 2)]
 
-    return window_indices
+    return indices
 
-def _compute_overlap(preds: np.ndarray, pred_indices: List[Tuple[int, int]],
+
+def _compute_overlap(preds: torch.Tensor, pred_indices: List[Tuple[int, int]],
                      gt_indices: List[Tuple[int, int]], alpha: float,
                      bias_fn: Callable, cardinality_fn: Callable,
                      use_window_weight: bool = False) -> float:
@@ -200,38 +252,43 @@ def _compute_overlap(preds: np.ndarray, pred_indices: List[Tuple[int, int]],
 
     return total_score / denom
 
-def ts_precision_and_recall(anomalies: np.ndarray, predictions: np.ndarray, alpha: float = 0,
-                            recall_bias_fn: Callable[[np.ndarray], float] = constant_bias_fn,
-                            recall_cardinality_fn: Callable[[int, int], float] = inverse_proportional_cardinality_fn,
-                            precision_bias_fn: Optional[Callable[[np.ndarray], float]] = None,
-                            precision_cardinality_fn: Optional[Callable[[int, int], float]] = None,
+
+def ts_precision_and_recall(anomalies: torch.Tensor, predictions: torch.Tensor, alpha: float = 0,
+                            recall_bias_fn: Callable[[torch.Tensor], float] = constant_bias_fn,
+                            recall_cardinality_fn: Callable[[int], float] = inverse_proportional_cardinality_fn,
+                            precision_bias_fn: Optional[Callable] = None,
+                            precision_cardinality_fn: Optional[Callable] = None,
                             anomaly_ranges: Optional[List[Tuple[int, int]]] = None,
                             prediction_ranges: Optional[List[Tuple[int, int]]] = None,
                             weighted_precision: bool = False) -> Tuple[float, float]:
     """
     Computes precision and recall for time series as defined in [Tatbul2018]_.
 
-    :param anomalies: Binary 1-D numpy array containing the true labels.
-    :param predictions: Binary 1-D numpy array containing the predicted labels.
+    .. note::
+       The default parameters for this function correspond to the defaults recommended in [Tatbul2018]_. However,
+       those might not be desirable in most cases, please see [Wagner2023]_ for a detailed discussion.
+
+    :param anomalies: Binary 1-D :class:`~torch.Tensor` of shape ``(length,)`` containing the true labels.
+    :param predictions: Binary 1-D :class:`~torch.Tensor` of shape ``(length,)`` containing the predicted labels.
     :param alpha: Weight for existence term in recall.
     :param recall_bias_fn: Function that computes the bias term for a given ground-truth window.
-    :param recall_cardinality_fn: Function that computes the cardinality factor for a given ground-truth window.
+    :param recall_cardinality_fn: Function that compute the cardinality factor for a given ground-truth window.
     :param precision_bias_fn: Function that computes the bias term for a given predicted window.
-        If None, this will be the same as recall_bias_function.
+        If ``None``, this will be the same as ``recall_bias_function``.
     :param precision_cardinality_fn: Function that computes the cardinality factor for a given predicted window.
-        If None, this will be the same as recall_cardinality_function.
+        If ``None``, this will be the same as ``recall_cardinality_function``.
     :param weighted_precision: If True, the precision score of a predicted window will be weighted with the
         length of the window in the final score. Otherwise, each window will have the same weight.
-    :param anomaly_ranges: A list of tuples (start, end) for each anomaly window in anomalies, where start
-        is the index at which the window starts and end is the first index after the end of the window. This can
-        be None, in which case the list is computed automatically from anomalies.
-    :param prediction_ranges: A list of tuples (start, end) for each anomaly window in predictions, where
-        start is the index at which the window starts and end is the first index after the end of the window.
-        This can be None, in which case the list is computed automatically from predictions.
+    :param anomaly_ranges: A list of tuples ``(start, end)`` for each anomaly window in ``anomalies``, where ``start``
+        is the index at which the window starts and ``end`` is the first index after the end of the window. This can
+        be ``None``, in which case the list is computed automatically from ``anomalies``.
+    :param prediction_ranges: A list of tuples ``(start, end)`` for each anomaly window in ``predictions``, where
+        ``start`` is the index at which the window starts and ``end`` is the first index after the end of the window.
+        This can be ``None``, in which case the list is computed automatically from ``predictions``.
     :return: A tuple consisting of the time-series precision and recall for the given labels.
     """
-    has_anomalies = np.any(anomalies > 0)
-    has_predictions = np.any(predictions > 0)
+    has_anomalies = torch.any(anomalies > 0).item()
+    has_predictions = torch.any(predictions > 0).item()
 
     # Catch special cases which would cause a division by zero
     if not has_predictions and not has_anomalies:
@@ -259,30 +316,75 @@ def ts_precision_and_recall(anomalies: np.ndarray, predictions: np.ndarray, alph
     return precision, recall
 
 
+
+
+
+## Main Evaluator
+
+
 class Evaluator:
     """
-    A class that can compute several evaluation metrics for a dataset using NumPy arrays.
-    Each method returns the score as a single float, but it can also return additional information in a dict.
+    A class that can compute several evaluation metrics for a dataset. Each method returns the score as a single float,
+    but it can also return additional information in a dict.
     """
 
-    def rocauc(self, labels: np.ndarray, scores: np.ndarray) -> Tuple[float, Dict[str, Any]]:
+    def rocauc(self, labels: torch.Tensor, scores: torch.Tensor) -> Tuple[float, Dict[str, Any]]:
         """
         Compute the classic point-wise area under the receiver operating characteristic curve.
-        """
-        return roc_auc_score(labels, scores), {}
-
-    def f1_score(self, labels: np.ndarray, scores: np.ndarray, pos_label: int = 1) -> Tuple[float, Dict[str, Any]]:
-        """
-        Compute the classic point-wise F1 score.
-        """
         
-        return f1_score(labels, scores, pos_label=pos_label), {}
+        This will return a value between 0 and 1 where 1 indicates a perfect classifier.
 
-    def best_fbeta_score(self, labels: np.ndarray, scores: np.ndarray, beta: float) -> Tuple[float, Dict[str, Any]]:
+        .. seealso::
+            Scikit-learns's :func:`~sklearn.metrics.roc_auc_score` function.
+
+        :param labels: A 1-D :class:`~torch.Tensor` containing the ground-truth labels. 1 corresponds to an anomaly,
+            0 means that the point is normal.
+        :param scores: A 1-D :class:`~torch.Tensor` containing the scores returned by an
+            :class:`~timesead.models.common.AnomalyDetector`.
+        :return: A tuple consisting of the AUC score and an empty dict.
         """
-        Compute the classic point-wise F_beta score.
+
+        return roc_auc_score(labels.numpy(), scores.numpy()), {}
+
+    def f1_score(self, labels: torch.Tensor, scores: torch.Tensor, pos_label: int = 1) -> Tuple[float, Dict[str, Any]]:
+        """Compute the classic point-wise F1 score.
+        
+        This will return a value between 0 and 1 where 1 indicates a perfect classifier.
+
+        .. seealso::
+            Scikit-learn's :func:`~sklearn.metrics.f1_score` function.
+
+        :param labels: A 1-D :class:`~torch.Tensor` containing the ground-truth labels. 1 corresponds to an anomaly,
+            0 means that the point is normal.
+        :param scores: A 1-D :class:`~torch.Tensor` containing binary predictions of whether a point is an anomaly or
+            not.
+        :param pos_label: Class to report.
+        :return: A tuple consisting of the F1 score and an empty dict.
         """
-        precision, recall, thresholds = precision_recall_curve(labels, scores)
+
+        return f1_score(labels.numpy(), scores.numpy(), pos_label=pos_label).item(), {}
+
+    def best_fbeta_score(self, labels: torch.Tensor, scores: torch.Tensor, beta: float) -> Tuple[float, Dict[str, Any]]:
+        r"""
+        Compute the classic point-wise :math:`F_{\beta}` score.
+
+        This method will apply all possible thresholds to the values in ``scores`` and compute the :math:`F_{\beta}`
+        score for the resulting binary predictions. It then returns the highest score.
+
+        .. seealso::
+            Scikit-learn's :func:`~sklearn.metrics.fbeta_score` function.
+
+        :param labels: A 1-D :class:`~torch.Tensor` containing the ground-truth labels. 1 corresponds to an anomaly,
+            0 means that the point is normal.
+        :param scores: A 1-D :class:`~torch.Tensor` containing the scores returned by an
+            :class:`~timesead.models.common.AnomalyDetector`.
+        :param beta: Positive number that determines the trade-off between precision and recall when computing the
+            F-score. :math:`\beta = 1` assigns equal weight to both while :math:`\beta < 1` emphasizes precision and
+            vice versa.
+        :return: A tuple consisting of the best :math:`F_{\beta}` score and a dict containing the threshold that
+            produced the maximal score.
+        """
+        precision, recall, thresholds = precision_recall_curve(labels.numpy(), scores.numpy())
 
         numerator = (1 + beta ** 2) * precision * recall
         denominator = beta ** 2 * precision + recall
@@ -294,20 +396,20 @@ class Evaluator:
 
         best_index = np.argmax(f_score)
         area = self.auprc(labels, scores)
-        if labels.sum() > 0:
+        if labels.numpy().sum() > 0:
             auc_roc = self.rocauc(labels, scores)     
         else:
             print('AUC-ROC cannot be computed as true labels only have one class, computing AUC-PR instead')
             auc_roc = area
         
-        return dict(f1=f_score[best_index],                    
-                    precision=precision[best_index],
-                    recall=recall[best_index],                   
+        return dict(f1=f_score[best_index].item(),                    
+                    precision=precision[best_index].item(),
+                    recall=recall[best_index].item(),                   
                     auprc=area[0],
                     auroc= auc_roc[0],
-                    threshold=thresholds[best_index])
+                    threshold=thresholds[best_index].item())
 
-    def best_f1_score(self, labels: np.ndarray, scores: np.ndarray) -> Tuple[float, Dict[str, Any]]:
+    def best_f1_score(self, labels: torch.Tensor, scores: torch.Tensor) -> Tuple[float, Dict[str, Any]]:
         r"""
         Compute the classic point-wise :math:`F_{1}` score.
 
@@ -324,20 +426,29 @@ class Evaluator:
         :return: A tuple consisting of the best :math:`F_{1}` score and a dict containing the threshold that
             produced the maximal score.
         """
+
         return self.best_fbeta_score(labels, scores, 1)
 
-    def auprc(self, labels: np.ndarray, scores: np.ndarray, integration: str = 'trapezoid') -> Tuple[float, Dict[str, Any]]:
-        """
+    def auprc(self, labels: torch.Tensor, scores: torch.Tensor, integration: str = 'trapezoid') -> Tuple[float, Dict[str, Any]]:
+        r"""
         Compute the classic point-wise area under the precision-recall curve.
 
-        :param labels: A 1-D numpy array containing the ground-truth labels. 1 corresponds to an anomaly,
+        This will return a value between 0 and 1 where 1 indicates a perfect classifier.
+
+        .. seealso::
+            Scikit-learn's :func:`~sklearn.metrics.average_precision` function.
+
+            Scikit-learn's :func:`~sklearn.metrics.precision_recall_curve` function.
+
+        :param labels: A 1-D :class:`~torch.Tensor` containing the ground-truth labels. 1 corresponds to an anomaly,
             0 means that the point is normal.
-        :param scores: A 1-D numpy array containing the scores.
-        :param integration: Method to use for computing the area under the curve. 'riemann' corresponds to a simple
-            Riemann sum, whereas 'trapezoid' uses the trapezoidal rule.
+        :param scores: A 1-D :class:`~torch.Tensor` containing the scores returned by an
+            :class:`~timesead.models.common.AnomalyDetector`.
+        :param integration: Method to use for computing the area under the curve. ``'riemann'`` corresponds to a simple
+            Riemann sum, whereas ``'trapezoid'`` uses the trapezoidal rule.
         :return: A tuple consisting of the AuPRC score and an empty dict.
         """
-        precision, recall, _ = precision_recall_curve(labels, scores)
+        precision, recall, thresholds = precision_recall_curve(labels.numpy(), scores.numpy())
         # recall is nan in the case where all ground-truth labels are 0. Simply set it to zero here
         # so that it does not contribute to the area
         recall = np.nan_to_num(recall, nan=0)
@@ -347,9 +458,9 @@ class Evaluator:
         else:
             area = auc(recall, precision)
 
-        return area, {}
+        return area.item(), {}
 
-    def average_precision(self, labels: np.ndarray, scores: np.ndarray) -> Tuple[float, Dict[str, Any]]:
+    def average_precision(self, labels: torch.Tensor, scores: torch.Tensor) -> Tuple[float, Dict[str, Any]]:
         r"""
         Compute the classic point-wise average precision score.
 
@@ -367,17 +478,35 @@ class Evaluator:
         """
         return self.auprc(labels, scores, integration='riemann')
 
-
-    def ts_auprc(self, labels: np.ndarray, scores: np.ndarray, integration='trapezoid',
+    def ts_auprc(self, labels: torch.Tensor, scores: torch.Tensor, integration='trapezoid',
                  weighted_precision: bool = True) -> Tuple[float, Dict[str, Any]]:
         """
-        Compute the area under the precision-recall curve using precision and recall for time series.
-        """
-        thresholds = np.unique(scores)
+        Compute the area under the precision-recall curve using precision and recall for time series [Tatbul2018]_.
 
-        precision = np.empty(len(thresholds) + 1)
-        recall = np.empty(len(thresholds) + 1)
-        predictions = np.empty_like(scores, dtype=int)
+        .. note::
+            This function uses the improved cardinality function described in [Wagner2023]_.
+
+        :param labels: A 1-D :class:`~torch.Tensor` containing the ground-truth labels. 1 corresponds to an anomaly,
+            0 means that the point is normal.
+        :param scores: A 1-D :class:`~torch.Tensor` containing the scores returned by an
+            :class:`~timesead.models.common.AnomalyDetector`
+        :param integration: Method to use for computing the area under the curve. ``'riemann'`` corresponds to a simple
+            Riemann sum, whereas ``'trapezoid'`` uses the trapezoidal rule.
+        :param weighted_precision: If ``True``, the precision score of a predicted window will be weighted with the
+            length of the window in the final score. Otherwise, each window will have the same weight.
+        :return: A tuple consisting of the AuPRC score and an empty dict.
+
+        .. [Tatbul2018] N. Tatbul, T.J. Lee, S. Zdonik, M. Alam, J. Gottschlich.
+            Precision and recall for time series. Advances in neural information processing systems. 2018;31.
+        .. [Wagner2023] D. Wagner, T. Michels, F.C.F. Schulz, A. Nair, M. Rudolph, and M. Kloft.
+            TimeSeAD: Benchmarking Deep Multivariate Time-Series Anomaly Detection.
+            Transactions on Machine Learning Research (TMLR), (to appear) 2023.
+        """
+        thresholds = torch.unique(input=scores, sorted=True)
+
+        precision = torch.empty(thresholds.shape[0] + 1, dtype=torch.float, device=thresholds.device)
+        recall = torch.empty(thresholds.shape[0] + 1, dtype=torch.float, device=thresholds.device)
+        predictions = torch.empty_like(scores, dtype=torch.long)
 
         # Set last values when threshold is at infinity so that no point is predicted as anomalous.
         # Precision is not defined in this case, we set it to 1 to stay consistent with scikit-learn
@@ -387,7 +516,7 @@ class Evaluator:
         label_ranges = compute_window_indices(labels)
 
         for i, t in enumerate(thresholds):
-            predictions = scores >= t
+            torch.greater_equal(scores, t, out=predictions)
             prec, rec = ts_precision_and_recall(labels, predictions, alpha=0,
                                                 recall_cardinality_fn=improved_cardinality_fn,
                                                 anomaly_ranges=label_ranges,
@@ -396,13 +525,13 @@ class Evaluator:
             recall[i] = rec
 
         if integration == 'riemann':
-            area = -np.sum(np.diff(recall) * precision[:-1])
+            area = -torch.sum(torch.diff(recall) * precision[:-1])
         else:
-            area = auc(recall, precision)
+            area = auc(recall.numpy(), precision.numpy())
 
-        return area, {}
+        return area.item(), {}
 
-    def ts_average_precision(self, labels: np.ndarray, scores: np.ndarray, weighted_precision: bool = True) \
+    def ts_average_precision(self, labels: torch.Tensor, scores: torch.Tensor, weighted_precision: bool = True) \
             -> Tuple[float, Dict[str, Any]]:
         """
         Compute the average precision score using precision and recall for time series [Tatbul2018]_.
@@ -421,7 +550,7 @@ class Evaluator:
 
         return self.ts_auprc(labels, scores, integration='riemann', weighted_precision=weighted_precision)
 
-    def ts_auprc_unweighted(self, labels: np.ndarray, scores: np.ndarray) -> Tuple[float, Dict[str, Any]]:
+    def ts_auprc_unweighted(self, labels: torch.Tensor, scores: torch.Tensor) -> Tuple[float, Dict[str, Any]]:
         """
         Compute the area under the precision-recall curve using precision and recall for time series [Tatbul2018]_.
 
@@ -437,20 +566,21 @@ class Evaluator:
         """
         return self.ts_auprc(labels, scores, integration='trapezoid', weighted_precision=False)
 
-    def __best_ts_fbeta_score(self, labels: np.ndarray, scores: np.ndarray, beta: float,
+    def __best_ts_fbeta_score(self, labels: torch.Tensor, scores: torch.Tensor, beta: float,
                               recall_cardinality_fn: Callable = improved_cardinality_fn,
-                              weighted_precision: bool = True) -> Dict[str, Any]:
-        thresholds = np.unique(scores)
+                              weighted_precision: bool = True) -> Tuple[float, Dict[str, Any]]:
+        thresholds = torch.unique(input=scores, sorted=True)
 
-        precision = np.empty(len(thresholds))
-        recall = np.empty(len(thresholds))
-        predictions = np.empty_like(scores, dtype=int)
+        precision = torch.empty_like(thresholds, dtype=torch.float)
+        recall = torch.empty_like(thresholds, dtype=torch.float)
+        predictions = torch.empty_like(scores, dtype=torch.long)
 
         label_ranges = compute_window_indices(labels)
+        # label_ranges = None
 
         for i, t in enumerate(thresholds):
-            predictions = scores > t
-            prec, rec = ts_precision_and_recall(labels, predictions.astype(int), alpha=0,
+            torch.greater(scores, t, out=predictions)
+            prec, rec = ts_precision_and_recall(labels, predictions, alpha=0,
                                                 recall_cardinality_fn=recall_cardinality_fn,
                                                 anomaly_ranges=label_ranges,
                                                 weighted_precision=weighted_precision)
@@ -464,26 +594,24 @@ class Evaluator:
             precision[i] = prec
             recall[i] = rec
 
-        f_score = (1 + beta**2) * precision * recall / (np.maximum(beta**2 * precision + recall, 1e-15))
-        max_score_index = np.argmax(f_score)
-        area = self.ts_auprc(labels, scores, integration='trapezoid', weighted_precision=weighted_precision)
+        f_score = (1 + beta**2) * precision * recall / (beta**2 * precision + recall)
+        max_score_index = torch.argmax(f_score)
+        area = self.ts_auprc(labels, scores, integration='trapezoid', weighted_precision=weighted_precision) #
         area_roc = self.auprc(labels, scores)
-        if labels.sum() > 0:
-            auc_roc = self.rocauc(labels, scores)
+        if labels.numpy().sum() > 0:
+            auc_roc = self.rocauc(labels, scores)     
         else:
             print('AUC-ROC cannot be computed as true labels only have one class, computing AUC-PR instead')
             auc_roc = area_roc
+        
+        return dict(f1=f_score[max_score_index].item(),                    
+                    precision=precision[max_score_index].item(),
+                    recall=recall[max_score_index].item(),
+                    auprc=area[0],
+                    auroc= auc_roc[0],
+                    threshold=thresholds[max_score_index].item())   
 
-        return {
-            'f1': f_score[max_score_index],
-            'precision': precision[max_score_index],
-            'recall': recall[max_score_index],
-            'auprc': area[0],
-            'auroc': auc_roc[0],
-            'threshold': thresholds[max_score_index]
-        }
-
-    def best_ts_fbeta_score(self, labels: np.ndarray, scores: np.ndarray, beta: float) -> Tuple[float, Dict[str, Any]]:
+    def best_ts_fbeta_score(self, labels: torch.Tensor, scores: torch.Tensor, beta: float) -> Tuple[float, Dict[str, Any]]:
         r"""
         Compute the :math:`F_{\beta}` score using precision and recall for time series [Tatbul2018]_.
 
@@ -506,7 +634,7 @@ class Evaluator:
         return self.__best_ts_fbeta_score(labels, scores, beta, recall_cardinality_fn=improved_cardinality_fn,
                                         weighted_precision=True)
 
-    def best_ts_fbeta_score_classic(self, labels: np.ndarray, scores: np.ndarray, beta: float) -> Tuple[float, Dict[str, Any]]:
+    def best_ts_fbeta_score_classic(self, labels: torch.Tensor, scores: torch.Tensor, beta: float) -> Tuple[float, Dict[str, Any]]:
         r"""
         Compute the :math:`F_{\beta}` score using precision and recall for time series [Tatbul2018]_.
 
@@ -531,7 +659,7 @@ class Evaluator:
                                           recall_cardinality_fn=inverse_proportional_cardinality_fn,
                                           weighted_precision=False)
 
-    def best_ts_f1_score(self, labels: np.ndarray, scores: np.ndarray) -> Tuple[float, Dict[str, Any]]:
+    def best_ts_f1_score(self, labels: torch.Tensor, scores: torch.Tensor) -> Tuple[float, Dict[str, Any]]:
         r"""
         Compute the :math:`F_{1}` score using precision and recall for time series [Tatbul2018]_.
 
@@ -550,7 +678,7 @@ class Evaluator:
         """
         return self.best_ts_fbeta_score(labels, scores, 1)
 
-    def best_ts_f1_score_classic(self, labels: np.ndarray, scores: np.ndarray) -> Tuple[float, Dict[str, Any]]:
+    def best_ts_f1_score_classic(self, labels: torch.Tensor, scores: torch.Tensor) -> Tuple[float, Dict[str, Any]]:
         r"""
         Compute the :math:`F_{1}` score using precision and recall for time series [Tatbul2018]_.
 

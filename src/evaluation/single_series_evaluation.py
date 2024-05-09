@@ -5,7 +5,7 @@ import pandas as pd
 from src.evaluation.point_adjust import evaluate as evaluate_pa
 from src.evaluation.scoring_functions import Evaluator
 
-def evaluate_ts(scores, targets, eval_method='point_wise', verbose=True):
+def evaluate_ts(scores, targets, eval_method='point_wise', verbose=False):
     # eval_method one of {'point_wise', 'point_adjust', 'range_wise'}
     if eval_method == 'point_adjust':
         # point adjust eval
@@ -21,10 +21,10 @@ def evaluate_ts(scores, targets, eval_method='point_wise', verbose=True):
     return results, df
 
 
-def get_ts_eval(scores, targets, eval_method='point_wise', verbose=True):
+def get_ts_eval(scores, targets, eval_method='point_wise', verbose=False):
     ts_evalator = Evaluator()
-    targets = torch.from_numpy(targets)
-    scores = torch.from_numpy(scores)
+    #targets = torch.from_numpy(targets)
+    #scores = torch.from_numpy(scores)
     
     if eval_method == 'point_wise':
         # point wise standard metrics
@@ -33,7 +33,7 @@ def get_ts_eval(scores, targets, eval_method='point_wise', verbose=True):
         # recall-consistant [wagner et al. 2023]
         results = ts_evalator.best_ts_f1_score(targets, scores)
     else:        
-        raise ValueError('Evaluation method not implemented.')
+        raise ValueError('Evaluation method not implemented. use one of {"point_wise", "range_wise", "point_adjust"} ')
     
     ## dataframe to display
     metrics_name= ['F1', 'Precision', 'Recall', 'AUPRC', 'AUROC']

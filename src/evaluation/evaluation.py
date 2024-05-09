@@ -6,7 +6,7 @@ from tqdm import tqdm
 
 from src.evaluation.single_series_evaluation import evaluate_ts
 from src.evaluation.evaluation_utils import get_results_for_all_score_normalizations
-from src.dataset_utils.data_utils import preprocess_data, concatenate_windows_feat
+from src.dataset_utils.data_utils import preprocess_data, concatenate_windows_feat, normalise_scores
 
 
 def evaluate_methods(
@@ -31,6 +31,9 @@ def evaluate_methods(
     else:
         test_labels = labels
 
+    if score_normalization not in [None, "mean-std", "median-iqr", "optimal", "all"]:
+        raise ValueError('specify one of the normalisation argument {None, "mean-std", "median-iqr", "optimal", "all"}')
+    
     dfs_per_method: list[tuple[Optional[str], pd.DataFrame]] = []
 
     for name, method in methods.items():
@@ -40,21 +43,26 @@ def evaluate_methods(
         score_normalizations_applicable = (len(anomaly_scores.shape) > 1) and (anomaly_scores.shape[1] > 1)
 
         if score_normalizations_applicable:
-            dfs_all_normalizations, df_best_normalization = get_results_for_all_score_normalizations(
-                anomaly_scores,
-                test_labels,
-                eval_method=eval_method
-            )
-
-            if score_normalization == 'all':
-                dfs_per_method.extend([
-                    (f'{name} ({normalization_name} norm)', df)
-                    for normalization_name, df in dfs_all_normalizations.items()
-                ])
-            elif score_normalization == 'optimal':
-                dfs_per_method.append((str(name), df_best_normalization))
+            if score_normalization in ['all', 'optimal']:
+                dfs_all_normalizations, df_best_normalization = get_results_for_all_score_normalizations(
+                    anomaly_scores,
+                    test_labels,
+                    eval_method=eval_method
+                )
+    
+                if score_normalization == 'all':
+                    dfs_per_method.extend([
+                        (f'{name} ({normalization_name} norm)', df)
+                        for normalization_name, df in dfs_all_normalizations.items()
+                    ])
+                else:
+                    dfs_per_method.append((str(name), df_best_normalization))
             else:
-                dfs_per_method.append((str(name), dfs_all_normalizations[score_normalization]))
+                _, df_norm = evaluate_ts(normalise_scores(anomaly_scores, norm=score_normalization).max(1),
+                                   test_labels,
+                                   eval_method=eval_method
+                                )
+                dfs_per_method.append((str(name), df_norm))
 
         else:
             _, df_no_normalization = evaluate_ts(
@@ -183,9 +191,6 @@ def evaluate_methods_on_datasets(
             '0-1': Min-max scaling to [0, 1].
             'mean-std': A scaling to mean 0 and standard deviation 1.
             'none': It performs no normalization.
-
-            'optimal': For each dataset, it picks the best scoring one of the above in the test set.
-            'all': It tries all methods when applicable and returns all three scores.
         score_normalization: Normalize the scores outputted by the methods per sensor. Can take the following values:
             'median-iqr': Robust normalization by subtracting the mean and dividing by the interquartile range.
             'mean-std': A scaling to mean 0 and standard deviation 1.
