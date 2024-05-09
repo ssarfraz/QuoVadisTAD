@@ -4,8 +4,8 @@ import nox
 @nox.session(python=False)
 def format_and_test(session):
 	session.run("poetry", "install", "--with", "dev")
-	session.run("poetry", "run", "ruff", "format", "src", "notebooks")
-	session.run("poetry", "run", "ruff", "check", "--fix", "src", "notebooks")
+	session.run("poetry", "run", "ruff", "format", "quovadis_tad", "notebooks")
+	session.run("poetry", "run", "ruff", "check", "--fix", "quovadis_tad", "notebooks")
 
 
 @nox.session(python=False)
@@ -21,5 +21,5 @@ def make_docs(session):
 		"doc",
 		"--math",
 		"--mermaid",
-		"src",
+		"quovadis_tad",
 	)

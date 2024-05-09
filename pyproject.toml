@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "tad"
+name = "quovadis-tad"
 version = "0.1.0"
 description = "Timeseries Anomaly Detection"
 authors = [
@@ -9,7 +9,7 @@ maintainers = [
     "Muhammad Saquib Sarfraz <muhammad_saquib.sarfraz@mercedes-benz.com>, Marios Koulakis <marios.koulakis@kit.edu>, Mei-Yen Chen <mei-yen.chen@mercedes-benz.com>"]
 readme = "README.md"
 packages = [
-    { include = "*", from = "src" },
+    { include = "*", from = "quovadis_tad" },
 ]
 
 
@@ -75,7 +75,7 @@ build-backend = "poetry.core.masonry.api"
 minversion = "6.0"
 addopts = "-ra -q --import-mode=importlib"
 pythonpath = [
-    "src"
+    "quovadis_tad"
 ]
 
 testpaths = [

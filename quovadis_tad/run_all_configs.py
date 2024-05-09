@@ -3,8 +3,8 @@ from pathlib import Path
 import glob
 import numpy as np
 import typer
-from src.dataset_utils.dataset_reader import datasets
-from src.model_utils.model_def import train_embedder
+from quovadis_tad.dataset_utils.dataset_reader import datasets
+from quovadis_tad.model_utils.model_def import train_embedder
 
 module_path = str(Path.cwd())
 
@@ -15,7 +15,7 @@ def run_configs(dataset_name: str,
                 config_to_run: str = None):
     
     print(f'[INFO]: Module_path = {module_path}')
-    configs = glob.glob(os.path.join(module_path, 'src', 'model_configs', '*.yaml'))
+    configs = glob.glob(os.path.join(module_path, 'quovadis_tad', 'model_configs', '*.yaml'))
     print(f'Found {len(configs)} configs to run')
     for config_path in configs:
         # check if already trained this config
