@@ -9,7 +9,16 @@ falcetl/
 # Temporary ignore them for development.
 notebooks/synthetic_timeseries.ipynb
 
-# Datasets
+# Raw Datasets
+resources/raw_datasets/SMAP/
+resources/raw_datasets/MSL/
+resources/raw_datasets/SMD/
+resources/raw_datasets/SWaT/
+resources/raw_datasets/WADI_112/
+resources/raw_datasets/WADI_127/
+resources/raw_datasets/UCR/
+
+# Preprocessed datasets
 resources/processed_datasets/SMAP/
 resources/processed_datasets/MSL/
 resources/processed_datasets/SMD/

@@ -8,38 +8,23 @@ functions for reading in benchmark datasets:
     - UCR/IB
 """
 
+# Python pacakges
 from pathlib import Path
-from typing import Union, Tuple, Dict, Callable, List
+from typing import Union, Tuple, Dict, Callable
 from enum import Enum
 import pandas as pd
-import os
 import numpy as np
 # import h5py
 
 
+# QuoVadis packages
+from quovadis_tad.dataset_utils.data_utils import find_files_in_path, extract_ucr_internal_bleeding_dataset
+
+
+# Configuration
+
 DATA_DIR = 'resources/processed_datasets'
 """the name of the data directory"""
-
-
-def find_files_in_path(directory: str, file_ending: str = ".npy") -> List[str]:
-    """list all the files with ending in a path.
-
-    :param directory: the directory where you'd like to find the files
-
-    :param file_ending: the type of file. Default: .npy
-
-    :return: a list of matched files
-    """
-    # initialize the output list
-    found_files = []
-
-    # Walk through the files in the directory
-    for root, dirs, files in os.walk(directory):
-        for file in files:
-            if file.endswith(file_ending):
-                # add a found file to the list
-                found_files.append(file)
-    return found_files
 
 
 class GeneralDatasetNames(Enum):
@@ -95,7 +80,19 @@ def load_swat(data_path: Union[str, Path]) -> Tuple[np.ndarray, np.ndarray, np.n
     return trainset, testset, test_labels
 
 
-# load only the trace used in TransAD
+def load_ucr_IB_16(data_path: Union[str, Path]) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    data_path = Path(data_path)
+    files_path = data_path / DATA_DIR / "UCR"
+    data = []
+    for file in ['train', 'test', 'labels']:
+        data.append(np.load(Path(files_path, f'135_{file}.npy')))
+    trainset = data[0]
+    testset = data[1]
+    test_labels = data[2]
+
+    return trainset, testset, test_labels
+
+
 def load_ucr_IB_17(data_path: Union[str, Path]) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     data_path = Path(data_path)
     files_path = data_path / DATA_DIR / "UCR"
@@ -108,18 +105,6 @@ def load_ucr_IB_17(data_path: Union[str, Path]) -> Tuple[np.ndarray, np.ndarray,
 
     return trainset, testset, test_labels
 
-
-def load_ucr_IB_16(data_path: Union[str, Path]) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
-    data_path = Path(data_path)
-    files_path = data_path / DATA_DIR / "UCR"
-    data = []
-    for file in ['train', 'test', 'labels']:
-        data.append(np.load(Path(files_path, f'135_{file}.npy')))
-    trainset = data[0]
-    testset = data[1]
-    test_labels = data[2]
-
-    return trainset, testset, test_labels
 
 def load_ucr_IB_18(data_path: Union[str, Path]) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     data_path = Path(data_path)
@@ -147,6 +132,8 @@ def load_ucr_IB_19(data_path: Union[str, Path]) -> Tuple[np.ndarray, np.ndarray,
     return trainset, testset, test_labels
 
 def load_ucr_IB(data_path: Union[str, Path]) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """UCR/Internal Bleeding dataset loader. 
+    """
     # load all four UCR/IB traces
     data_path = Path(data_path)
     files_path = data_path / DATA_DIR / "UCR"
