@@ -8,10 +8,11 @@ falcetl/
 
 # Temporary ignore them for development.
 notebooks/synthetic_timeseries.ipynb
+notebooks/test_dataset_loaders.ipynb
+quovadis_tad/dataset_utils/preprocess.py
 
 # Raw Datasets
-resources/raw_datasets/SMAP/
-resources/raw_datasets/MSL/
+resources/raw_datasets/SMAP_MSL/
 resources/raw_datasets/SMD/
 resources/raw_datasets/SWaT/
 resources/raw_datasets/WADI_112/

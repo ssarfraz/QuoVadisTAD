@@ -4,8 +4,12 @@ import abc
 from typing import List
 from gettext import npgettext
 import numpy as np
+import pandas as pd
+
 from sklearn.preprocessing import StandardScaler, MinMaxScaler
 from scipy.stats import iqr
+
+
 
 
 """
@@ -35,6 +39,64 @@ def find_files_in_path(directory: str, file_ending: str = ".npy") -> List[str]:
 """
 Data extraction 
 """
+
+# ---- Clean and test the codes below ---
+def load_and_save(category, filename, dataset, dataset_folder, output_folder):
+    temp = np.genfromtxt(os.path.join(dataset_folder, category, filename),
+                         dtype=np.float64,
+                         delimiter=',')
+    print(dataset, category, filename, temp.shape)
+    np.save(os.path.join(output_folder, f"SMD/{dataset}_{category}.npy"), temp)
+    return temp.shape
+
+def load_and_save2(category, filename, dataset, dataset_folder, shape, output_folder):
+	temp = np.zeros(shape)
+	with open(os.path.join(dataset_folder, 'interpretation_label', filename), "r") as f:
+		ls = f.readlines()
+	for line in ls:
+		pos, values = line.split(':')[0], line.split(':')[1].split(',')
+		start, end, indx = int(pos.split('-')[0]), int(pos.split('-')[1]), [int(i)-1 for i in values]
+		temp[start-1:end-1, indx] = 1
+	print(dataset, category, filename, temp.shape)
+	np.save(os.path.join(output_folder, f"SMD/{dataset}_{category}.npy"), temp)
+
+def extract_smd_dataset(dataset_folder:str, output_dir:str) -> None:
+    #dataset_folder = 'data/SMD'
+    file_list = os.listdir(os.path.join(dataset_folder, "train"))
+    for filename in file_list:
+        # todo - basically, this part is simply convert .txt to numpy array and save it
+        if filename.endswith('.txt'):
+            load_and_save('train', filename, filename.strip('.txt'), dataset_folder, output_dir)
+            s = load_and_save('test', filename, filename.strip('.txt'), dataset_folder, output_dir)
+            load_and_save2('labels', filename, filename.strip('.txt'), dataset_folder, s, output_dir)
+
+
+# todo: this part seems to be complicated. 
+def extract_smap_msl_dataset(dataset_folder:str, output_dir:str, dataset) -> None:
+    #dataset_folder = 'data/SMAP_MSL'
+	file = os.path.join(dataset_folder, 'labeled_anomalies.csv')
+	values = pd.read_csv(file)
+	values = values[values['spacecraft'] == dataset]
+	filenames = values['chan_id'].values.tolist()
+	for fn in filenames:
+		train = np.load(f'{dataset_folder}/train/{fn}.npy')
+		test = np.load(f'{dataset_folder}/test/{fn}.npy')
+
+        # todo - I am not sure if we have to normalize the data here.
+		#train, min_a, max_a = normalize3(train)
+		#test, _, _ = normalize3(test, min_a, max_a)
+		np.save(f'{os.path.join(output_dir, dataset)}/{fn}_train.npy', train)
+		np.save(f'{os.path.join(output_dir, dataset)}/{fn}_test.npy', test)
+		labels = np.zeros(test.shape)
+		indices = values[values['chan_id'] == fn]['anomaly_sequences'].values[0]
+		indices = indices.replace(']', '').replace('[', '').split(', ')
+		indices = [int(i) for i in indices]
+
+		for i in range(0, len(indices), 2):
+			labels[indices[i]:indices[i+1], :] = 1
+		np.save(f'{os.path.join(output_dir, dataset)}/{fn}_labels.npy', labels)
+
+# ---- Clean and test the codes above ---
 
 def extract_ucr_internal_bleeding_dataset(dataset_folder:str, output_dir:str) -> None:
     """Extracts the UCR/Internal Bleeding dataset from a .txt file and saves it
