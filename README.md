@@ -44,7 +44,7 @@ Two notebooks are provided as `quick-start` tutorials for running and evaluating
 
 ### 2.2 Datasets
 
-We use various multivariate and univariate datasets, see the paper for details. Please note some datasets still requires to sign up an access request on the providers website, see the [readme](./resources/processed_datasets/README.md) in the processed_datasets folder for respective copyright notices and details. After downloading the datasets please copy those into the [./resources/processed_datasets] folder.
+We use various multivariate and univariate datasets, see the paper for details. Please note some datasets still requires to sign up an access request on the providers website, see the [readme](./resources/raw_datasets/README.md) in the raw_datasets folder for respective copyright notices and details. After downloading the datasets please copy those into the [./resources/raw_datasets] folder. The [test_dataset_loaders](./notebooks/test_dataset_loaders.ipynb) will extract and prepare the data for further analysis.
 
  
 ### 2.3 API Documentation
