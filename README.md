@@ -1,6 +1,6 @@
 # Quo Vadis, Unsupervised Time Series Anomaly Detection?
 
-QuoVadisTAD contains the artifacts of our ICML 2024 position paper [Quo Vadis, Unsupervised Time Series Anomaly Detection?](https://arxiv.org/abs/2405.02678).  
+QuoVadisTAD contains the artifacts of our ICML 2024 position paper [Quo Vadis, Unsupervised Time Series Anomaly Detection?](https://arxiv.org/abs/2405.02678v2).  
 
 Our position paper criticises the prevailing practices in Time Series Anomaly Detection (TAD), pinpointing issues with persistent use of flawed evaluation metrics, benchmarking inconsistencies, and unnecessary complexity in the offered deep learning based models for the task. We advocate for consistent benchmarking, better datasets, and a focus on model utility by drawing simpler baselines. Our findings suggest that simple methods often exceed the performance of complex TAD deep models, which typically learn linear mappings. We offer simple & effective baselines and a repository with benchmarks and strict evaluation protocols to redirect TAD research towards more meaningful progress.
 
